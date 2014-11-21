@@ -12,7 +12,13 @@ sed -i 's/^127.0.0.1 localhost$/& '$MY_HOSTNAME' '$MY_HOSTNAME'.'$DOMAIN'/' /etc
 # we don't want a password (use the root key instead)
 useradd -m virl
 usermod -a -G sudo virl
-cp -R /home/ubuntu/.ssh/ /home/virl/
+# standard cloud image has an ubuntu user
+# on Rackspace, it is the root user
+if [ -d /home/ubuntu ]; then
+  cp -R /home/ubuntu/.ssh/ /home/virl/
+else
+  cp -R /home/root/.ssh/ /home/virl/
+fi
 chown -R virl.virl /home/virl/.ssh/
 
 # clone the VIRL boot strap
@@ -29,7 +35,7 @@ mkdir -p /etc/salt/pki/minion
 cp ./master_sign.pub /etc/salt/pki/minion
 rm -f ./preseed_keys/minion.pem
 cp /tmp/*.pem ./preseed_keys/minion.pem
-openssl rsa -in ./preseed_keys/minion.pem  -pubout > ./preseed_keys/minion.pub
+openssl rsa -in ./preseed_keys/minion.pem -pubout >./preseed_keys/minion.pub
 cp -f ./preseed_keys/minion.pem /etc/salt/pki/minion/minion.pem
 cp -f ./preseed_keys/minion.pub /etc/salt/pki/minion/minion.pub
 chmod 400 /etc/salt/pki/minion/minion.pem

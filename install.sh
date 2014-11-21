@@ -41,11 +41,10 @@ then
   echo "No more steps -- removing us from rc.local"  
   echo "=============================================================================="  
   echo  
-  # sed -i 's/.*###BOOTSTRAP###$/exit 0/' /etc/rc.local  
-  # rm -fr $STAGE_DIR  
+  sed -i 's/.*###BOOTSTRAP###$/exit 0/' /etc/rc.local  
 fi  
   
 echo rebooting in 60 seconds  
-sleep 60  
-reboot  
+# sleep 60  
+# reboot  
 

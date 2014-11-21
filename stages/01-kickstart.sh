@@ -37,13 +37,13 @@ sh /home/virl/virl-bootstrap/bootstrap-salt.sh git 2014.7
 
 # make sure we are connected to the master
 # before we continue
-if [[ $(sudo salt-call test.ping) =~ True ]]; then 
+if [[ $(salt-call test.ping) =~ True ]]; then 
 
   # make a backup of the interface configuration!
   cp /etc/network/interfaces /root/interfaces
 
   # do ZERO
-  sudo salt-call state.sls zero
+  salt-call state.sls zero
 
   # swap the key ID and domain in virl.ini
   cp ${ORIGIN}/../etc/virl.ini /etc/
@@ -58,6 +58,16 @@ if [[ $(sudo salt-call test.ping) =~ True ]]; then
   mv /etc/network/interfaces /etc/network/interfaces-virl
   cp /root/interfaces /etc/network/interfaces
   cat /etc/network/interfaces-virl >>/etc/network/interfaces
+
+  # install salt stuff
+  if [ -f /etc/salt/grains ]; then
+    rm /etc/salt/grains
+  fi
+  /usr/local/bin/vinstall salt
+
+  # install FIRST
+  sleep 5 
+  /usr/local/bin/vinstall first
 
   # after this, it's time for a reboot
   # e.g. first stage is done!

@@ -7,7 +7,8 @@ set -x
 
 PATH=/usr/sbin:/usr/bin:/sbin:/bin
 
-. $(dirname $0)/etc/config  
+cd $(dirname $0)
+. etc/config  
   
 #
 # get the next step in the sequence
@@ -45,6 +46,6 @@ then
 fi  
   
 echo rebooting in 60 seconds  
-# sleep 60  
-# reboot  
+sleep 10  
+reboot  
 

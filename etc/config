@@ -1,0 +1,4 @@
+LOGFILE="/root/virl-install.log"
+MY_HOSTNAME=$(hostname)
+STAGES="stages"
+

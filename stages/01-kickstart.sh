@@ -54,11 +54,6 @@ if [[ $(salt-call test.ping) =~ True ]]; then
   crudini --set /etc/virl.ini DEFAULT hostname $MY_HOSTNAME
   crudini --set /etc/virl.ini DEFAULT domain $DOMAIN
 
-  # need to take care of the interface changes...
-  mv /etc/network/interfaces /etc/network/interfaces-virl
-  cp /root/interfaces /etc/network/interfaces
-  cat /etc/network/interfaces-virl >>/etc/network/interfaces
-
   # install salt stuff
   if [ -f /etc/salt/grains ]; then
     rm /etc/salt/grains
@@ -68,6 +63,12 @@ if [[ $(salt-call test.ping) =~ True ]]; then
   # install FIRST
   sleep 5 
   /usr/local/bin/vinstall first
+
+  # need to take care of the interface changes...
+  # before we reboot ;)
+  mv /etc/network/interfaces /etc/network/interfaces-virl
+  cp /root/interfaces /etc/network/interfaces
+  # cat /etc/network/interfaces-virl >>/etc/network/interfaces
 
   # after this, it's time for a reboot
   # e.g. first stage is done!

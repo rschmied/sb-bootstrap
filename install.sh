@@ -3,7 +3,7 @@
 # Find out where we are, and read our config file. From there we'll know all further  
 # path names.  
 #  
-set -x
+# set -x
 
 PATH=/usr/sbin:/usr/bin:/sbin:/bin
 

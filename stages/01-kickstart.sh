@@ -2,7 +2,7 @@
 
 PATH=/usr/sbin:/usr/bin:/sbin:/bin
 
-ORIGIN=$(dirname $0)
+ORIGIN=$(dirname $(readlink -f $0))
 . ${ORIGIN}/../etc/config
 
 # add our hostname to localhost
@@ -53,7 +53,7 @@ if [[ $(sudo salt-call test.ping) =~ True ]]; then
   crudini --set /etc/virl.ini DEFAULT salt_domain $SALT_DOMAIN
 
   # do the first stage installation
-  vinstall all
+  /usr/local/bin/vinstall all
 
   # need to take care of the interface changes...
   mv /etc/network/interfaces /etc/network/interfaces-virl

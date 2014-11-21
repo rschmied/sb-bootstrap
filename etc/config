@@ -1,4 +1,4 @@
-LOGFILE="/root/virl-install.log"
+LOGDIR="/root"
 MY_HOSTNAME=$(hostname)
 STAGES="stages"
 DOMAIN="virl.lab"

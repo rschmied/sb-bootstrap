@@ -6,7 +6,7 @@ ORIGIN=$(dirname $(readlink -f $0))
 . ${ORIGIN}/../etc/config
 
 # add our hostname to localhost
-# sed -i 's/^127.0.0.1 localhost$/& '$MY_HOSTNAME' '$MY_HOSTNAME'.'$DOMAIN'/' /etc/hosts
+sed -i 's/^127.0.0.1 localhost$/& '$MY_HOSTNAME' '$MY_HOSTNAME'.'$DOMAIN'/' /etc/hosts
 
 # create the VIRL user 'virl'
 # we don't want a password (use the root key instead)
@@ -68,7 +68,9 @@ if [[ $(salt-call test.ping) =~ True ]]; then
   # before we reboot ;)
   mv /etc/network/interfaces /etc/network/interfaces-virl
   cp /root/interfaces /etc/network/interfaces
-  # cat /etc/network/interfaces-virl >>/etc/network/interfaces
+  cat /etc/network/interfaces-virl | \
+    sed -e '/^auto lo/d;/^iface lo inet loopback/d' \
+    >>/etc/network/interfaces
 
   # after this, it's time for a reboot
   # e.g. first stage is done!

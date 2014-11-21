@@ -27,7 +27,7 @@ if [ "$STEP" != "" ]; then
   echo "Executing step: "  $STEP
   echo "=============================================================================="  
   echo  
-  $STAGES/$STEP 2>&1 > ${LOGFILE}-${STEP}
+  $STAGES/$STEP 2>&1 > ${LOGDIR}/${STEP}.log
   mv $STAGES/$STEP $STAGES/done-$STEP
   STEP=$(get_step)
 fi  
@@ -45,7 +45,7 @@ then
   sed -i 's/.*###BOOTSTRAP###$/exit 0/' /etc/rc.local  
 fi  
   
-echo rebooting in 60 seconds  
+echo rebooting in 10 seconds  
 sleep 10  
 reboot  
 

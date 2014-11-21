@@ -16,8 +16,11 @@ while [[ $(sudo salt-call test.ping) =~ False ]]; do
   sleep 10
 done
 
-# do the first stage installation
+# do all the other VIRL install stages
 /usr/local/bin/vinstall all
+
+# install the router VMs (lengthy)
+salt-call state.sls routervms
 
 exit
 

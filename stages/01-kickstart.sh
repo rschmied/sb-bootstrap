@@ -6,7 +6,7 @@ ORIGIN=$(dirname $(readlink -f $0))
 . ${ORIGIN}/../etc/config
 
 # add our hostname to localhost
-sed -i 's/^127.0.0.1 localhost$/& '$(hostname)'/' /etc/hosts
+sed -i 's/^127.0.0.1 localhost$/& '$MY_HOSTNAME' '$MY_HOSTNAME'.'$DOMAIN'/' /etc/hosts
 
 # create the VIRL user 'virl'
 # we don't want a password (use the root key instead)
@@ -28,7 +28,7 @@ cd /home/virl/virl-bootstrap
 mkdir -p /etc/salt/pki/minion
 cp ./master_sign.pub /etc/salt/pki/minion
 rm -f ./preseed_keys/minion.pem
-mv /tmp/*.pem ./preseed_keys/minion.pem
+cp /tmp/*.pem ./preseed_keys/minion.pem
 openssl rsa -in ./preseed_keys/minion.pem  -pubout > ./preseed_keys/minion.pub
 cp -f ./preseed_keys/minion.pem /etc/salt/pki/minion/minion.pem
 cp -f ./preseed_keys/minion.pub /etc/salt/pki/minion/minion.pub
@@ -51,6 +51,10 @@ if [[ $(sudo salt-call test.ping) =~ True ]]; then
   SALT_ID=$(basename /tmp/*.pem | cut -d. -f1)
   crudini --set /etc/virl.ini DEFAULT salt_id $SALT_ID
   crudini --set /etc/virl.ini DEFAULT salt_domain $SALT_DOMAIN
+  crudini --set /etc/virl.ini DEFAULT hostname $MY_HOSTNAME
+  crudini --set /etc/virl.ini DEFAULT domain $DOMAIN
+
+
 
   # do the first stage installation
   /usr/local/bin/vinstall all

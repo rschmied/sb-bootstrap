@@ -27,7 +27,7 @@ if [ "$STEP" != "" ]; then
   echo "Executing step: "  $STEP
   echo "=============================================================================="  
   echo  
-  $STAGES/$STEP 2>&1 | tee -a $LOGFILE  
+  $STAGES/$STEP 2>&1 > ${LOGFILE}-${STEP}
   mv $STAGES/$STEP $STAGES/done-$STEP
   STEP=$(get_step)
 fi  

@@ -6,7 +6,7 @@ ORIGIN=$(dirname $(readlink -f $0))
 . ${ORIGIN}/../etc/config
 
 # add our hostname to localhost
-sed -i 's/^127.0.0.1 localhost$/& '$MY_HOSTNAME' '$MY_HOSTNAME'.'$DOMAIN'/' /etc/hosts
+# sed -i 's/^127.0.0.1 localhost$/& '$MY_HOSTNAME' '$MY_HOSTNAME'.'$DOMAIN'/' /etc/hosts
 
 # create the VIRL user 'virl'
 # we don't want a password (use the root key instead)
@@ -32,7 +32,7 @@ cp /tmp/*.pem ./preseed_keys/minion.pem
 openssl rsa -in ./preseed_keys/minion.pem  -pubout > ./preseed_keys/minion.pub
 cp -f ./preseed_keys/minion.pem /etc/salt/pki/minion/minion.pem
 cp -f ./preseed_keys/minion.pub /etc/salt/pki/minion/minion.pub
-chmod 400 /etc/salt/pki/minion.pem
+chmod 400 /etc/salt/pki/minion/minion.pem
 sh /home/virl/virl-bootstrap/bootstrap-salt.sh git 2014.7
 
 # make sure we are connected to the master

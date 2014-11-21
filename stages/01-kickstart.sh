@@ -54,11 +54,6 @@ if [[ $(sudo salt-call test.ping) =~ True ]]; then
   crudini --set /etc/virl.ini DEFAULT hostname $MY_HOSTNAME
   crudini --set /etc/virl.ini DEFAULT domain $DOMAIN
 
-
-
-  # do the first stage installation
-  /usr/local/bin/vinstall all
-
   # need to take care of the interface changes...
   mv /etc/network/interfaces /etc/network/interfaces-virl
   cp /root/interfaces /etc/network/interfaces

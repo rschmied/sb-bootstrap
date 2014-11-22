@@ -1,9 +1,15 @@
 #!/bin/bash
 #  
-# Find out where we are, and read our config file. From there we'll know all further  
-# path names.  
+# This install script executes all scripts in the stages directory
+# they need to be named 00-something.sh ([0-9]{2}-)
+# Exit status of the stages script is either 
+# - 0 (no reboot needed) 
+# - 1 (reboot needed)
+# if no more stages are found, the script will remove the script
+# invocation from /etc/rc.local (where it has been installed 
+# during initial bootstrap)
 #  
-# set -x
+#set -x
 
 PATH=/usr/sbin:/usr/bin:/sbin:/bin
 
@@ -17,35 +23,43 @@ function get_step() {
   echo $(ls $STAGES/??-* 2> /dev/null | head -1 | sed -e 's/.*\///')  
 }
   
-#
-# if there are steps left in the stages directory we are not done yet
-# exechute the next step
-#
-STEP=$(get_step)
-if [ "$STEP" != "" ]; then
-  echo  
-  echo "Executing step: "  $STEP
-  echo "=============================================================================="  
-  echo  
-  $STAGES/$STEP >${LOGDIR}/${STEP}.log 2>&1 
-  mv $STAGES/$STEP $STAGES/done-$STEP
+DONE=0
+while [[ $DONE == 0 ]]; do
   STEP=$(get_step)
-fi  
-  
-#  
-# Check if this was the last step. 
-# If it was, make sure we are never invoked again.  
-#  
-if [ "$STEP" = "" ]  
-then  
-  echo  
-  echo "No more steps -- removing us from rc.local"  
-  echo "=============================================================================="  
-  echo  
-  sed -i 's/.*###BOOTSTRAP###$/exit 0/' /etc/rc.local  
-fi  
-  
-echo rebooting in 10 seconds  
-sleep 10  
-reboot  
+  if [ "$STEP" != "" ]; then
+    echo  
+    echo "Executing step: "  $STEP
+    echo "=============================================================================="  
+    echo  
+    $STAGES/$STEP >${LOGDIR}/${STEP}.log 2>&1 
+    BOOT_NEEDED=$?
+    mv $STAGES/$STEP $STAGES/done-$STEP
+    STEP=$(get_step)
+  fi  
+    
+  #  
+  # Check if this was the last step. 
+  # If it was, make sure we are never invoked again.  
+  #  
+  if [ "$STEP" = "" ]  
+  then  
+    echo  
+    echo "No more steps -- removing us from rc.local"  
+    echo "=============================================================================="  
+    echo  
+    sed -i 's/.*###BOOTSTRAP###$/exit 0/' /etc/rc.local  
+    DONE=1
+  fi  
 
+  #
+  # if the reboot flag is set
+  # do a reboot, otherwise just stop
+  #
+  if [[ $BOOT_NEEDED > 0 ]]; then
+    DONE=1
+    echo "Rebooting in 10 seconds..."
+    sleep 10  
+    reboot  
+  fi
+
+done

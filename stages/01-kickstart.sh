@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# restart required after this stage (exit=1)
+#
 
 PATH=/usr/sbin:/usr/bin:/sbin:/bin
 
@@ -92,5 +95,5 @@ EOF
 fi
 
 
-exit
+exit 1
 

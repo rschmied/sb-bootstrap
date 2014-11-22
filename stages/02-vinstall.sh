@@ -1,4 +1,7 @@
 #!/bin/bash
+# 
+# no restart required after this stage (exit=0)
+#
 
 PATH=/usr/sbin:/usr/bin:/sbin:/bin
 
@@ -22,5 +25,5 @@ done
 # install the router VMs (lengthy)
 salt-call state.sls routervms
 
-exit
+exit 0
 

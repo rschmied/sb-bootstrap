@@ -31,7 +31,9 @@ while [[ $DONE == 0 ]]; do
     echo "Executing step: "  $STEP
     echo "=============================================================================="  
     echo  
+    echo -n "Start: "; date
     $STAGES/$STEP >${LOGDIR}/${STEP}.log 2>&1 
+    echo -n "Done:  "; date
     BOOT_NEEDED=$?
     mv $STAGES/$STEP $STAGES/done-$STEP
     STEP=$(get_step)

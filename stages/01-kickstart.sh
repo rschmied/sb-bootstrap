@@ -20,7 +20,7 @@ usermod -a -G sudo virl
 if [ -d /home/ubuntu ]; then
   cp -R /home/ubuntu/.ssh/ /home/virl/
 else
-  cp -R /home/root/.ssh/ /home/virl/
+  cp -R /root/.ssh/ /home/virl/
 fi
 chown -R virl.virl /home/virl/.ssh/
 

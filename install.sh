@@ -75,6 +75,7 @@ while [[ $DONE == 0 ]]; do
     echo "=============================================================================="  
     echo  
     sed -i 's/.*###BOOTSTRAP###$/exit 0/' /etc/rc.local  
+    print_timediff $TIME_BORN $TIME_NOW "Total time to install:"
     DONE=1
   fi  
 

@@ -33,12 +33,16 @@ while [[ $DONE == 0 ]]; do
     echo  
     echo -n "Start: "; date
     TIME_START=$(date +"%s")
+
+    # execute the step and get the return state
     $STAGES/$STEP >${LOGDIR}/${STEP}.log 2>&1 
     BOOT_NEEDED=$?
+
     echo -n "Done:  "; date;
     TIME_DONE=$(date +"%s")
     TIME_DIFF=$(($TIME_DONE-$TIME_START))
     echo "$(($TIME_DIFF / 60)) min $(($TIME_DIFF % 60)) sec"
+
     mv $STAGES/$STEP $STAGES/done-$STEP
     STEP=$(get_step)
   fi  

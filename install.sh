@@ -25,20 +25,24 @@ function get_step() {
   
 DONE=0
 while [[ $DONE == 0 ]]; do
+
+  #
+  # print a timestamp
+  #
+  echo -n "Start: "; date
+  TIME_START=$(date +"%s")
+
+  #
+  # what is the next step?
+  #
   STEP=$(get_step)
   if [ "$STEP" != "" ]; then
     echo  
     echo "Executing step: "  $STEP
     echo "=============================================================================="  
     echo  
-    echo -n "Start: "; date
-    TIME_START=$(date +"%s")
     $STAGES/$STEP >${LOGDIR}/${STEP}.log 2>&1 
     BOOT_NEEDED=$?
-    echo -n "Done:  "; date;
-    TIME_DONE=$(date +"%s")
-    TIME_DIFF=$(($TIME_DONE-$TIME_START))
-    echo "$(($TIME_DIFF / 60)) min $(($TIME_DIFF % 60)) sec"
     mv $STAGES/$STEP $STAGES/done-$STEP
     STEP=$(get_step)
   fi  
@@ -57,6 +61,15 @@ while [[ $DONE == 0 ]]; do
     DONE=1
   fi  
 
+  # 
+  # print the ending time stamp
+  # and the time elapsed
+  #
+  echo -n "Done:  "; date;
+  TIME_DONE=$(date +"%s")
+  TIME_DIFF=$(($TIME_DONE-$TIME_START))
+  echo "$(($TIME_DIFF / 60)) min $(($TIME_DIFF % 60)) sec"
+
   #
   # if the reboot flag is set
   # do a reboot, otherwise just stop
@@ -69,3 +82,4 @@ while [[ $DONE == 0 ]]; do
   fi
 
 done
+

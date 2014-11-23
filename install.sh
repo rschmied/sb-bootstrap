@@ -65,11 +65,11 @@ while [[ $DONE == 0 ]]; do
   fi  
     
   #  
-  # Check if this was the last step. 
-  # If it was, make sure we are never invoked again.  
+  # Check if there are no more steps to execute -and-
+  # there is no pending reboot...
+  # If yes: Make sure we are never invoked again.  
   #  
-  if [ "$STEP" = "" ]  
-  then  
+  if [[ "$STEP" == "" && $BOOT_NEEDED == 0 ]]; then
     echo  
     echo "No more steps -- removing us from rc.local"  
     echo "=============================================================================="  

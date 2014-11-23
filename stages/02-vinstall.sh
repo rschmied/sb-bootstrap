@@ -25,5 +25,5 @@ done
 # install the router VMs (lengthy)
 salt-call state.sls routervms
 
-exit 0
+exit 1
 

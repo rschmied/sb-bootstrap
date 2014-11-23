@@ -1,0 +1,36 @@
+#cloud-config
+hostname: virl-server 
+package_upgrade: true
+packages:
+- git
+runcmd:
+- [ sh, /root/boot.sh ]
+write_files:
+- path: /tmp/AABBCCDD.some.tld.pem
+  owner: root:root
+  content: |
+    -----BEGIN RSA PRIVATE KEY-----
+    some key data
+    -----END RSA PRIVATE KEY-----
+  permissions: '0444'
+- path: /root/boot.sh
+  owner: root:root
+  content: |
+    #!/bin/bash
+    cd /root
+    git clone https://github.com/rschmied/sb-bootstrap.git
+    if [ -x /root/sb-bootstrap/install.sh ]; then
+      sed -ie "s/^exit 0$/\/root\/sb-bootstrap\/install.sh >>\/root\/bootstrap.log 2>\&1; exit 0; ###BOOTSTRAP###/" /etc/rc.local
+      /root/sb-bootstrap/install.sh >/root/bootstrap.log 2>&1 &
+    fi
+  permissions: '0511'
+- path: /etc/salt/minion.d/extra.conf
+  owner: root:root
+  content: |
+    master: [salt-master.cisco.com]
+    id: AABBCCDD
+    append_domain: some.tld
+    verify_master_pubkey_sign: True 
+    master_shuffle: True 
+    master_alive_interval: 180 
+  permissions: '0644'

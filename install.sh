@@ -29,7 +29,7 @@ function get_step() {
 # $2 is the current time
 # $3 is a label
 #
-fuction print_timediff() {
+function print_timediff() {
   TIME_DIFF=$(($2-$1))
   echo "$3 $(($TIME_DIFF / 60)) min $(($TIME_DIFF % 60)) sec"
 }
@@ -37,7 +37,7 @@ fuction print_timediff() {
 #
 # get the start time of this VM via Cloud Init meta data
 #
-TIME_BORN=$(born.py)
+TIME_BORN=$(./born.py)
 
 DONE=0
 while [[ $DONE == 0 ]]; do
@@ -54,9 +54,10 @@ while [[ $DONE == 0 ]]; do
     $STAGES/$STEP >${LOGDIR}/${STEP}.log 2>&1 
     BOOT_NEEDED=$?
 
-    echo -n "Done:  "; date;
-    print_timediff $TIME_STEP $(date +"%s") "For step  :"
-    print_timediff $TIME_BORN $(date +"%s") "Since born:"
+    echo -n "Done:  "; date
+    TIME_NOW=$(date +"%s")
+    print_timediff $TIME_STEP $TIME_NOW "For step  :"
+    print_timediff $TIME_BORN $TIME_NOW "Since born:"
 
     # remove step and get the next step (if any)
     mv $STAGES/$STEP $STAGES/done-$STEP

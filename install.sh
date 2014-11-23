@@ -40,6 +40,7 @@ function print_timediff() {
 TIME_BORN=$(./born.py)
 
 DONE=0
+BOOT_NEEDED=0
 while [[ $DONE == 0 ]]; do
   STEP=$(get_step)
   if [ "$STEP" != "" ]; then
@@ -75,6 +76,7 @@ while [[ $DONE == 0 ]]; do
     echo "=============================================================================="  
     echo  
     sed -i 's/.*###BOOTSTRAP###$/exit 0/' /etc/rc.local  
+    TIME_NOW=$(date +"%s")
     print_timediff $TIME_BORN $TIME_NOW "Total time to install:"
     DONE=1
   fi  

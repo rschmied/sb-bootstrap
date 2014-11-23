@@ -1,7 +1,8 @@
 #!/bin/bash
 # 
-# this installs all the remaining VIRL stuff
-# no restart required after this stage (exit=0)
+# this installs the VM images
+# if this is the final stage:
+# restart required after this stage (exit=1)
 #
 
 PATH=/usr/sbin:/usr/bin:/sbin:/bin
@@ -18,8 +19,8 @@ while [[ $(sudo salt-call test.ping) =~ False ]]; do
   sleep 10
 done
 
-# do all the other VIRL install stages
-/usr/local/bin/vinstall all
+# install the router VMs (lengthy)
+salt-call state.sls routervms
 
-exit 0
+exit 1
 

@@ -23,6 +23,9 @@ else
 fi
 chown -R virl.virl /home/virl/.ssh/
 
+# move virl.ini to its place
+cp ../etc/virl.ini /etc/
+
 # clone the VIRL boot strap
 su -c "git clone https://github.com/VIRL-Open/virl-bootstrap.git" - virl
 
@@ -60,7 +63,6 @@ cp /etc/network/interfaces /root/interfaces
 salt-call state.sls zero
 
 # swap the key ID and domain in virl.ini
-cp ../etc/virl.ini /etc/
 SALT_DOMAIN=$(basename /tmp/*.pem | cut -d. -f2,3)
 SALT_ID=$(basename /tmp/*.pem | cut -d. -f1)
 crudini --set /etc/virl.ini DEFAULT salt_id $SALT_ID

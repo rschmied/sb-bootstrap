@@ -1,5 +1,10 @@
+DOMAIN="virl.lab"
 LOGDIR="/root"
 MY_HOSTNAME=$(hostname)
+PATH=/usr/sbin:/usr/bin:/sbin:/bin
 STAGES="stages"
-DOMAIN="virl.lab"
+VPNCLIENT_CONF=/home/virl/vpn-client.ovpn
+VPNCLIENT_DEV=tun
+VPNCLIENT_PORT=443
+VPNCLIENT_PROT=tcp
 

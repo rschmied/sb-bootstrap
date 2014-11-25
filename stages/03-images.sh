@@ -22,5 +22,8 @@ done
 # install the router VMs (lengthy)
 salt-call state.sls routervms
 
-exit 1
+# restart openstack services (to avoid a restart)
+salt-call state.sls openstack-restart
+
+exit 0
 

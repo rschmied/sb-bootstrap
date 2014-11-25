@@ -1,8 +1,9 @@
 #!/bin/bash
 # 
 # This installs OpenVPN plus certificates.
-# Resulting client config files in VPNCLIENT_CONF from config
+# Resulting client config files in CFG_VPN_CONF from config
 #
+#set -x
 
 cd $(dirname $0)
 . ../etc/config  
@@ -40,7 +41,7 @@ cd /usr/share/easy-rsa/
 sed -ri 's/(^export KEY_CITY=")(.*)"/\1San Jose"/' ./vars
 sed -ri 's/(^export KEY_OU=")(.*)"/\1DevNet Sandbox"/' ./vars
 sed -ri 's/(^export KEY_ORG=")(.*)"/\1Cisco"/' ./vars
-sed -ri 's/(^export KEY_EMAIL=")(.*)"/\1root@'${MY_HOSTNAME}.${DOMAIN}'"/' ./vars
+sed -ri 's/(^export KEY_EMAIL=")(.*)"/\1root@'${CFG_HOSTNAME}.${CFG_DOMAIN}'"/' ./vars
 sed -ri 's/(^export KEY_EXPIRE=)(.*)/\1365/' ./vars
 sed -ri 's/(^export CA_EXPIRE=)(.*)/\1365/' ./vars
 
@@ -59,9 +60,9 @@ cp ca.crt my-server.* dh*.pem  /etc/openvpn/
 # create the server config file
 #
 cat >/etc/openvpn/server.conf <<EOF
-port $VPNCLIENT_PORT
-proto $VPNCLIENT_PROT
-dev $VPNCLIENT_DEV
+port $CFG_VPN_PORT
+proto $CFG_VPN_PROT
+dev $CFG_VPN_DEV
 ca   /etc/openvpn/ca.crt
 cert /etc/openvpn/my-server.crt
 key  /etc/openvpn/my-server.key
@@ -79,12 +80,12 @@ EOF
 ## push "dhcp-option DOMAIN virl.lab"
 
 
-cat >$VPNCLIENT_CONF <<EOF
+cat >$CFG_VPN_CONF <<EOF
 #  VIRL OpenVPN Server
 client
-dev $VPNCLIENT_DEV
-port $VPNCLIENT_PORT
-proto $VPNCLIENT_PROT
+dev $CFG_VPN_DEV
+port $CFG_VPN_PORT
+proto $CFG_VPN_PROT
 persist-tun
 verb 2
 mute 3
@@ -95,11 +96,11 @@ rcvbuf 100000
 EOF
 
 # remaining config stuff
-echo -n "remote " >>$VPNCLIENT_CONF
-default_ipv4 >>$VPNCLIENT_CONF
-print_cert "ca" ca.crt >>$VPNCLIENT_CONF
-print_cert "cert" my-client.crt >>$VPNCLIENT_CONF
-print_cert "key" my-client.key >>$VPNCLIENT_CONF
+echo -n "remote " >>$CFG_VPN_CONF
+default_ipv4 >>$CFG_VPN_CONF
+print_cert "ca" ca.crt >>$CFG_VPN_CONF
+print_cert "cert" my-client.crt >>$CFG_VPN_CONF
+print_cert "key" my-client.key >>$CFG_VPN_CONF
 
 
 # start OpenVPN service

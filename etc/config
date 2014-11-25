@@ -1,10 +1,11 @@
-DOMAIN="virl.lab"
-LOGDIR="/root"
-MY_HOSTNAME=$(hostname)
 PATH=/usr/sbin:/usr/bin:/sbin:/bin
 STAGES="stages"
-VPNCLIENT_CONF=/home/virl/vpn-client.ovpn
-VPNCLIENT_DEV=tun
-VPNCLIENT_PORT=443
-VPNCLIENT_PROT=tcp
+CFG_DOMAIN="virl.lab"
+CFG_LOGDIR="/root"
+CFG_HOSTNAME=$(hostname)
+CFG_CONF=/home/virl/vpn-client.ovpn
+CFG_VPN_DEV=tun
+CFG_VPN_PORT=443
+CFG_VPN_PROT=tcp
+CFG_SSH_PORT=22
 

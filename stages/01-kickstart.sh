@@ -2,14 +2,13 @@
 #
 # restart required after this stage (exit=1)
 #
+#set -x
 
-PATH=/usr/sbin:/usr/bin:/sbin:/bin
-
-ORIGIN=$(dirname $(readlink -f $0))
-. ${ORIGIN}/../etc/config
+cd $(dirname $0)
+. ../etc/config  
 
 # add our hostname to localhost
-sed -i 's/^127.0.0.1 localhost$/& '$MY_HOSTNAME' '$MY_HOSTNAME'.'$DOMAIN'/' /etc/hosts
+sed -i 's/^127.0.0.1 localhost$/& '$CFG_HOSTNAME' '$CFG_HOSTNAME'.'$CFG_DOMAIN'/' /etc/hosts
 
 # create the VIRL user 'virl'
 # we don't want a password (use the root key instead)
@@ -46,54 +45,48 @@ sh /home/virl/virl-bootstrap/bootstrap-salt.sh git 2014.7
 
 # make sure we are connected to the master
 # before we continue
-if [[ $(salt-call test.ping) =~ True ]]; then 
+# this will sleep forever if there's something wrong
+# with the key / connectivity
+# and it won't continue :)
+while [[ $(sudo salt-call test.ping) =~ False ]]; do
+  echo "no Salt connectivity ... sleeping 10s"
+  sleep 10
+done
 
-  # make a backup of the interface configuration!
-  cp /etc/network/interfaces /root/interfaces
+# make a backup of the interface configuration!
+cp /etc/network/interfaces /root/interfaces
 
-  # do ZERO
-  salt-call state.sls zero
+# do ZERO
+salt-call state.sls zero
 
-  # swap the key ID and domain in virl.ini
-  cp ${ORIGIN}/../etc/virl.ini /etc/
-  SALT_DOMAIN=$(basename /tmp/*.pem | cut -d. -f2,3)
-  SALT_ID=$(basename /tmp/*.pem | cut -d. -f1)
-  crudini --set /etc/virl.ini DEFAULT salt_id $SALT_ID
-  crudini --set /etc/virl.ini DEFAULT salt_domain $SALT_DOMAIN
-  crudini --set /etc/virl.ini DEFAULT hostname $MY_HOSTNAME
-  crudini --set /etc/virl.ini DEFAULT domain $DOMAIN
+# swap the key ID and domain in virl.ini
+cp ${ORIGIN}/../etc/virl.ini /etc/
+SALT_DOMAIN=$(basename /tmp/*.pem | cut -d. -f2,3)
+SALT_ID=$(basename /tmp/*.pem | cut -d. -f1)
+crudini --set /etc/virl.ini DEFAULT salt_id $SALT_ID
+crudini --set /etc/virl.ini DEFAULT salt_domain $SALT_DOMAIN
+crudini --set /etc/virl.ini DEFAULT hostname $CFG_HOSTNAME
+crudini --set /etc/virl.ini DEFAULT domain $CFG_DOMAIN
 
-  # install salt stuff
-  if [ -f /etc/salt/grains ]; then
-    rm /etc/salt/grains
-  fi
-  /usr/local/bin/vinstall salt
-
-  # install FIRST
-  sleep 5 
-  /usr/local/bin/vinstall first
-
-  # need to take care of the interface changes...
-  # before we reboot ;)
-  mv /etc/network/interfaces /etc/network/interfaces-virl
-  cp /root/interfaces /etc/network/interfaces
-  cat /etc/network/interfaces-virl | \
-    sed -e '/^auto lo/d;/^iface lo inet loopback/d' \
-    >>/etc/network/interfaces
-
-  # after this, it's time for a reboot
-  # e.g. first stage is done!
-
-else
-
-  cat <<EOF
-	####################
-        salt master problem
-        ####################
-EOF
-
+# install salt stuff
+if [ -f /etc/salt/grains ]; then
+  rm /etc/salt/grains
 fi
+/usr/local/bin/vinstall salt
 
+# install FIRST
+sleep 5 
+/usr/local/bin/vinstall first
 
-exit 1
+# need to take care of the interface changes...
+# before we reboot ;)
+mv /etc/network/interfaces /etc/network/interfaces-virl
+cp /root/interfaces /etc/network/interfaces
+cat /etc/network/interfaces-virl | \
+  sed -e '/^auto lo/d;/^iface lo inet loopback/d' \
+  >>/etc/network/interfaces
+
+# reboot required after FW is in place (next step)
+
+exit 0
 

@@ -52,7 +52,7 @@ while [[ $DONE == 0 ]]; do
     TIME_STEP=$(date +"%s")
 
     # execute the step and get the return state
-    $STAGES/$STEP >${LOGDIR}/${STEP}.log 2>&1 
+    $STAGES/$STEP >${CFG_LOGDIR}/${STEP}.log 2>&1 
     BOOT_NEEDED=$?
 
     echo -n "Done:  "; date

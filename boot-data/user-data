@@ -17,13 +17,16 @@ write_files:
   owner: root:root
   content: |
     #!/bin/bash
+    RCLOCAL=/etc/rc.local
     cd /root
     git clone https://github.com/rschmied/sb-bootstrap.git
     if [ -x /root/sb-bootstrap/install.sh ]; then
-      if [ $(cat /etc/rc.local | /usr/bin/wc -l) = 0 ]; then
-        echo exit 0 >>/etc/rc.local
+      if [ $(cat $RCLOCAL | sed '/^\s*$/d' | /usr/bin/wc -l) = 0 ]; then
+        echo "#!/bin/sh -e" >$RCLOCAL
+        echo "exit 0" >>$RCLOCAL
+        chmod u+x $RCLOCAL
       fi
-      sed -rie "\$s/(.*)/\/root\/sb-bootstrap\/install.sh >>\/root\/bootstrap.log 2>\&1; \1; ###BOOTSTRAP###/" /etc/rc.local
+      sed -rie "\$s/(.*)/\/root\/sb-bootstrap\/install.sh >>\/root\/bootstrap.log 2>\&1; \1; ###BOOTSTRAP###/" $RCLOCAL
       /root/sb-bootstrap/install.sh >/root/bootstrap.log 2>&1 &
     fi
   permissions: '0511'

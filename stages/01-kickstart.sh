@@ -60,7 +60,7 @@ cp /etc/network/interfaces /root/interfaces
 salt-call state.sls zero
 
 # swap the key ID and domain in virl.ini
-cp ${ORIGIN}/../etc/virl.ini /etc/
+cp ../etc/virl.ini /etc/
 SALT_DOMAIN=$(basename /tmp/*.pem | cut -d. -f2,3)
 SALT_ID=$(basename /tmp/*.pem | cut -d. -f1)
 crudini --set /etc/virl.ini DEFAULT salt_id $SALT_ID

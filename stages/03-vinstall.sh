@@ -15,6 +15,7 @@ cd /home/virl/virl-bootstrap
 wait_for_salt
 
 # do all the other VIRL install stages
+echo "install all remaining VIRL packages"
 /usr/local/bin/vinstall all
 
 exit $STATE_OK

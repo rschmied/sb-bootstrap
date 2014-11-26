@@ -55,6 +55,7 @@ COMMIT\n" /etc/ufw/before.rules
 #
 ufw allow in on $gw to any port $CFG_SSH_PORT proto tcp
 ufw allow in on $gw to any port $CFG_VPN_PORT proto $CFG_VPN_PROT
+ufw allow in on $CFG_VPN_DEV to any
 
 # sudo grep '^### tuple' /lib/ufw/user*.rules
 
@@ -63,6 +64,9 @@ ufw allow in on $gw to any port $CFG_VPN_PORT proto $CFG_VPN_PROT
 # across reboots!
 #
 echo "y" | ufw enable
+
+# show the configured rules
+ufw status verbose
 
 # after this, it's time for a reboot
 # e.g. first stage and firewall is done!

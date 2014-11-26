@@ -58,11 +58,13 @@ cp ca.crt ${CFG_HOSTNAME}.${CFG_DOMAIN}.* dh*.pem  /etc/openvpn/
 
 #
 # create the server config file
+# (duplicate-cn allows the cert to be used multiple times)
 #
 cat >/etc/openvpn/server.conf <<EOF
 port $CFG_VPN_PORT
 proto $CFG_VPN_PROT
 dev $CFG_VPN_DEV
+duplicate-cn
 ca   /etc/openvpn/ca.crt
 cert /etc/openvpn/${CFG_HOSTNAME}.${CFG_DOMAIN}.crt
 key  /etc/openvpn/${CFG_HOSTNAME}.${CFG_DOMAIN}.key
@@ -107,4 +109,3 @@ print_cert "key" virl-sandbox-client.key >>$CFG_VPN_CONF
 service openvpn restart
 
 exit $STATE_OK
-

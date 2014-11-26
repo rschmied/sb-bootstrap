@@ -53,16 +53,24 @@ while [[ $DONE == 0 ]]; do
 
     # execute the step and get the return state
     $STAGES/$STEP >${CFG_LOGDIR}/${STEP}.log 2>&1 
-    BOOT_NEEDED=$?
+    STATE=$?
 
     echo -n "Done:  "; date
     TIME_NOW=$(date +"%s")
     print_timediff $TIME_STEP $TIME_NOW "For step  :"
     print_timediff $TIME_BORN $TIME_NOW "Since born:"
 
-    # remove step and get the next step (if any)
-    mv $STAGES/$STEP $STAGES/done-$STEP
-    STEP=$(get_step)
+    # did the stage go well?
+    if [[ $STATE == $STATE_FATAL ]]; then
+      echo "**** FATAL  ERROR ****"
+      echo "check state log files!"
+      DONE=1
+      STEP=""
+    else
+      # disable current step and get the next step (if any)
+      mv $STAGES/$STEP $STAGES/done-$STEP
+      STEP=$(get_step)
+    fi
   fi  
     
   #  
@@ -70,7 +78,7 @@ while [[ $DONE == 0 ]]; do
   # there is no pending reboot...
   # If yes: Make sure we are never invoked again.  
   #  
-  if [[ "$STEP" == "" && $BOOT_NEEDED == 0 ]]; then
+  if [[ "$STEP" == "" && "$STATE" != "$STATE_REBOOT" ]]; then
     echo  
     echo "No more steps -- removing us from rc.local"  
     echo "=============================================================================="  

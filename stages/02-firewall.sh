@@ -7,7 +7,7 @@
 # set -x
 
 cd $(dirname $0)
-. ../etc/config
+. ../etc/common.sh
 
 # 
 # change default forward policy from 'DROP' to 'ACCEPT'
@@ -67,6 +67,4 @@ echo "y" | ufw enable
 # after this, it's time for a reboot
 # e.g. first stage and firewall is done!
 
-exit 1
-
-
+exit $STATE_REBOOT

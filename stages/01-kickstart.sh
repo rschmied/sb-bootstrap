@@ -1,11 +1,20 @@
 #!/bin/bash
 #
-# restart required after this stage (exit=1)
+# do initial preparations for VIRL installationn
+# - create required user
+# - get the bootstrap repo from Git hub
+# - prepare / install the required Salt keys
+# - prepare / modify the virl.ini
+# - do ZERO, SALT & FIRST
+# - help with the network interfaces
+# 
+# reboot will be needed but done after installing
+# the firewall (next step).
 #
 #set -x
 
 cd $(dirname $0)
-. ../etc/config  
+. ../etc/common.sh 
 
 # add our hostname to localhost
 sed -i 's/^127.0.0.1 localhost$/& '$CFG_HOSTNAME' '$CFG_HOSTNAME'.'$CFG_DOMAIN'/' /etc/hosts
@@ -28,6 +37,11 @@ cp ../etc/virl.ini /etc/
 
 # clone the VIRL boot strap
 su -c "git clone https://github.com/VIRL-Open/virl-bootstrap.git" - virl
+if [ ! -x /home/virl/virl-bootstrap/virl-bootstrap.py ]; then
+  echo "no VIRL bootstrap repo from Git available!"
+  echo "Bail out, serious Salt connectivity problem!"
+  exit $STATE_FATAL
+fi
 
 # now as root
 # copy and prep private
@@ -46,15 +60,8 @@ cp -f ./preseed_keys/minion.pub /etc/salt/pki/minion/minion.pub
 chmod 400 /etc/salt/pki/minion/minion.pem
 sh /home/virl/virl-bootstrap/bootstrap-salt.sh git 2014.7
 
-# make sure we are connected to the master
-# before we continue
-# this will sleep forever if there's something wrong
-# with the key / connectivity
-# and it won't continue :)
-while [[ $(sudo salt-call test.ping) =~ False ]]; do
-  echo "no Salt connectivity ... sleeping 10s"
-  sleep 10
-done
+# check that Salt is available and key is OK
+wait_for_salt
 
 # make a backup of the interface configuration!
 cp /etc/network/interfaces /root/interfaces
@@ -90,5 +97,5 @@ cat /etc/network/interfaces-virl | \
 
 # reboot required after FW is in place (next step)
 
-exit 0
+exit $STATE_OK
 

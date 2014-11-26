@@ -26,6 +26,10 @@ write_files:
         echo "exit 0" >>$RCLOCAL
         chmod u+x $RCLOCAL
       fi
+      if [ -f /tmp/config ]; then
+        echo "custom config will be appended"
+        cat /tmp/config >>/root/sb-bootstrap/etc/config
+      fi
       sed -rie "\$s/(.*)/\/root\/sb-bootstrap\/install.sh >>\/root\/bootstrap.log 2>\&1; \1; ###BOOTSTRAP###/" $RCLOCAL
       /root/sb-bootstrap/install.sh >/root/bootstrap.log 2>&1 &
     fi
@@ -40,3 +44,9 @@ write_files:
     master_shuffle: True 
     master_alive_interval: 180 
   permissions: '0644'
+- path: /tmp/config
+  owner: root:root
+  content: |
+    CFG_VPN_PORT=443
+  permissions: '0644'
+

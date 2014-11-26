@@ -6,7 +6,7 @@
 #set -x
 
 cd $(dirname $0)
-. ../etc/config  
+. ../etc/common.sh
 
 #
 # get the IPv4 address of the interface with the default route
@@ -48,12 +48,12 @@ sed -ri 's/(^export CA_EXPIRE=)(.*)/\1365/' ./vars
 . ./vars
 ./clean-all
 ./pkitool --initca
-./pkitool --server my-server
-./pkitool          my-client
+./pkitool --server ${CFG_HOSTNAME}.${CFG_DOMAIN}
+./pkitool          virl-sandbox-client
 ./build-dh
 
 cd keys/
-cp ca.crt my-server.* dh*.pem  /etc/openvpn/
+cp ca.crt ${CFG_HOSTNAME}.${CFG_DOMAIN}.* dh*.pem  /etc/openvpn/
 
 
 #
@@ -64,8 +64,8 @@ port $CFG_VPN_PORT
 proto $CFG_VPN_PROT
 dev $CFG_VPN_DEV
 ca   /etc/openvpn/ca.crt
-cert /etc/openvpn/my-server.crt
-key  /etc/openvpn/my-server.key
+cert /etc/openvpn/${CFG_HOSTNAME}.${CFG_DOMAIN}.crt
+key  /etc/openvpn/${CFG_HOSTNAME}.${CFG_DOMAIN}.key
 dh   /etc/openvpn/dh2048.pem
 server 172.16.4.0 255.255.255.0
 max-clients 20
@@ -99,12 +99,12 @@ EOF
 echo -n "remote " >>$CFG_VPN_CONF
 default_ipv4 >>$CFG_VPN_CONF
 print_cert "ca" ca.crt >>$CFG_VPN_CONF
-print_cert "cert" my-client.crt >>$CFG_VPN_CONF
-print_cert "key" my-client.key >>$CFG_VPN_CONF
+print_cert "cert" virl-sandbox-client.crt >>$CFG_VPN_CONF
+print_cert "key" virl-sandbox-client.key >>$CFG_VPN_CONF
 
 
 # start OpenVPN service
 service openvpn restart
 
-exit 0
+exit $STATE_OK
 

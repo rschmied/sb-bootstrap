@@ -6,19 +6,16 @@
 #set -x
 
 cd $(dirname $0)
-. ../etc/config  
+. ../etc/common.sh 
 
 # this is done as root
 cd /home/virl/virl-bootstrap
 
-# before we continue
-while [[ $(sudo salt-call test.ping) =~ False ]]; do
-  echo "no Salt connectivity ... sleeping 10s"
-  sleep 10
-done
+# check that Salt is available and key is OK
+wait_for_salt
 
 # do all the other VIRL install stages
 /usr/local/bin/vinstall all
 
-exit 0
+exit $STATE_OK
 

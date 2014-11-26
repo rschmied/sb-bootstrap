@@ -7,16 +7,13 @@
 #set -x
 
 cd $(dirname $0)
-. ../etc/config  
+. ../etc/common.sh  
 
 # this is done as root
 cd /home/virl/virl-bootstrap
 
-# before we continue
-while [[ $(sudo salt-call test.ping) =~ False ]]; do
-  echo "no Salt connectivity ... sleeping 10s"
-  sleep 10
-done
+# check that Salt is available and key is OK
+wait_for_salt
 
 # install the router VMs (lengthy)
 salt-call state.sls routervms
@@ -28,5 +25,5 @@ crudini --set /etc/virl/virl.cfg env virl_local_ip 172.16.1.1
 # restart openstack services (to avoid a restart)
 salt-call state.sls openstack-restart
 
-exit 0
+exit $STATE_OK
 

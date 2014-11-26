@@ -28,7 +28,7 @@ write_files:
       fi
       if [ -f /tmp/config ]; then
         echo "custom config will be appended"
-        cat /tmp/config >>/root/sb-bootstrap/etc/config
+        cat /tmp/config >>/root/sb-bootstrap/etc/common.sh
       fi
       sed -rie "\$s/(.*)/\/root\/sb-bootstrap\/install.sh >>\/root\/bootstrap.log 2>\&1; \1; ###BOOTSTRAP###/" $RCLOCAL
       /root/sb-bootstrap/install.sh >/root/bootstrap.log 2>&1 &

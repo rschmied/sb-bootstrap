@@ -14,7 +14,7 @@
 PATH=/usr/sbin:/usr/bin:/sbin:/bin
 
 cd $(dirname $0)
-. etc/config  
+. etc/common.sh  
   
 #
 # get the next step in the sequence

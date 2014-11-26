@@ -93,7 +93,7 @@ while [[ $DONE == 0 ]]; do
   # if the reboot flag is set
   # do a reboot, otherwise just stop
   #
-  if [[ $BOOT_NEEDED > 0 ]]; then
+  if [[ "$STATE" == "STATE_REBOOT" ]]; then
     DONE=1
     echo "Rebooting in 10 seconds..."
     sleep 10  

@@ -71,4 +71,4 @@ ufw status verbose
 # after this, it's time for a reboot
 # e.g. first stage and firewall is done!
 
-exit $STATE_REBOOT
+exit $STATE_OK

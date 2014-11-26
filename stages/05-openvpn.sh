@@ -108,4 +108,5 @@ print_cert "key" virl-sandbox-client.key >>$CFG_VPN_CONF
 # start OpenVPN service
 service openvpn restart
 
-exit $STATE_OK
+exit $STATE_REBOOT
+

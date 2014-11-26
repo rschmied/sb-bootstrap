@@ -55,6 +55,8 @@ while [[ $DONE == 0 ]]; do
     $STAGES/$STEP >${CFG_LOGDIR}/${STEP}.log 2>&1 
     STATE=$?
 
+    # sh -c "/bin/egrep -nr '^Failed:\s+[^0][1-9]+' 03-vinstall.sh.log "
+
     echo -n "Done:  "; date
     TIME_NOW=$(date +"%s")
     print_timediff $TIME_STEP $TIME_NOW "For step  :"

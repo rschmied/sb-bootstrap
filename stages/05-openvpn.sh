@@ -84,7 +84,7 @@ EOF
 
 
 cat >$CFG_VPN_CONF <<EOF
-#  VIRL OpenVPN Server
+#  VIRL OpenVPN Client Configuration
 client
 dev $CFG_VPN_DEV
 port $CFG_VPN_PORT
@@ -94,8 +94,32 @@ verb 2
 mute 3
 nobind
 reneg-sec 604800
-sndbuf 100000
-rcvbuf 100000
+# sndbuf 100000
+# rcvbuf 100000
+
+# Verify server certificate by checking
+# that the certicate has the nsCertType
+# field set to "server".  This is an
+# important precaution to protect against
+# a potential attack discussed here:
+#  http://openvpn.net/howto.html#mitm
+#
+# To use this feature, you will need to generate
+# your server certificates with the nsCertType
+# field set to "server".  The build-key-server
+# script in the easy-rsa folder will do this.
+ns-cert-type server
+
+# If you are connecting through an
+# HTTP proxy to reach the actual OpenVPN
+# server, put the proxy server/IP and
+# port number here.  See the man page
+# if your proxy server requires
+# authentication.
+;http-proxy-retry # retry on connection failures
+;http-proxy [proxy server] [proxy port #]
+
+
 EOF
 
 # remaining config stuff

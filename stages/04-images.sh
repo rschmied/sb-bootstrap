@@ -28,9 +28,15 @@ echo "doing misc settings"
 su -lc 'PS1=xxx; . ~/.bashrc; neutron subnet-update guest --dns_nameservers list=true 8.8.8.8 8.8.4.4' virl
 crudini --set /etc/virl/virl.cfg env virl_local_ip 172.16.1.1
 
+# DHCP server on guest not working reliably: 
+# also requires no guest account in virl.ini for the workaround to work
+# guest_account: False
+# this is a workaround (FIXME)
+su -lc 'PS1=xxx; . ~/.bashrc; virl_uwm_client --username uwmadmin --password password project-create --name guest --user-password guest' virl
+
 # restart openstack services (to avoid a restart)
-echo "restarting OpenStack services"
-salt-call state.sls openstack-restart
+# echo "restarting OpenStack services"
+# salt-call state.sls openstack-restart
 
 exit $STATE_OK
 

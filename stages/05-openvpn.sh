@@ -17,13 +17,14 @@ function default_ipv4 () {
 }
 
 #
-# print the certificate given in $2 between
-# --- BEGIN --- and --- END ---
+# print the certificate given in $2
 # wrap in tags provided in $1
+# (note that END is a perfectly valid sequence in a key
+# so the BEGIN and END patterns must be specific!)
 #
 function print_cert () {
   echo "<$1>"
-  cat $2 | sed -n '/BEGIN/,/END/p'
+  cat $2 | sed -n '/^-----BEGIN .*-----$/,/^-----END .*-----$/p'
   echo "</$1>"
 }
 

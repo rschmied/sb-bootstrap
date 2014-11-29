@@ -81,13 +81,63 @@ EOF
 ## push "dhcp-option DNS 8.8.8.8"
 ## push "dhcp-option DOMAIN virl.lab"
 
-# IP address pool definition
-# must match IP networks defined in /etc/virl.ini
+# 
+# the networks here must match IP networks defined in /etc/virl.ini
+# also different start procedure required for tap vs tun
+#
 if [[ $CFG_VPN_DEV =~ tun ]]; then
-  echo "server 172.16.4.0 255.255.255.0" >/etc/openvpn/server.conf
+  echo "server 172.16.4.0 255.255.255.0" >>/etc/openvpn/server.conf
+  ufw allow in on $CFG_VPN_DEV
 else
-  echo "server-bridge 172.16.1.1 255.255.255.0 172.16.1.32 172.16.1.48" >/etc/openvpn/server.conf
+  echo "server-bridge 172.16.1.1 255.255.255.0 172.16.1.32 172.16.1.48" >>/etc/openvpn/server.conf
+  echo "up /etc/openvpn/bridge-up.sh" >>/etc/openvpn/server.conf
+
+  cat >/etc/openvpn/bridge-up.sh <<EOF
+#!/bin/bash
+#
+# If using a bridged interface, some more stuff is required.
+# The bridge will be attached to FLAT == dummy1 interface.
+#
+# First, get the L3 interface attached to FLAT.
+# It might take a while until Neutron brings it up so we wait for it.
+#
+# \$1 = tap_dev 
+# \$2 = tap_mtu
+# \$3 = link_mtu 
+# \$4 = ifconfig_local_ip 
+# \$5 = ifconfig_netmask 
+# \$6 = [ init | restart ]
+#
+
+flat=""
+while [ "\$flat" = "" ]; do
+  flat=\$(brctl show | sed -rne '/dummy1/s/^(brq[a-z0-9\-]{11}).*dummy1$/\1/p')
+  if [ "\$flat" = "" ]; then
+  	echo "OpenVPN: waiting for FLAT bridge to come up..."
+  	sleep 5
+  fi
+done
+
+# add the VPN Tap device to the Bridge
+brctl addif \$flat \$1
+
+# bring the VPN Tap device up
+ifconfig \$1 up mtu \$2
+
+# make sure that the bridge interfaces are not subject
+# to iptables filtering
+sysctl -w net.bridge.bridge-nf-call-iptables=0
+sysctl -w net.bridge.bridge-nf-call-ip6tables=0
+
+# add the bridge to iptables
+ufw allow in on \$flat
+
+exit
+EOF
+  # make it executable
+  chmod u+x /etc/openvpn/bridge-up.sh
 fi
+
 
 #
 # client config file
@@ -139,23 +189,9 @@ print_cert "cert" virl-sandbox-client.crt >>$CFG_VPN_CONF
 print_cert "key" virl-sandbox-client.key >>$CFG_VPN_CONF
 
 
-#
-# if bridged interface, some more stuff required
-# bridge will be attached to FLAT == dummy1 interface
-#
-if [[ $CFG_VPN_DEV =~ tap ]]; then
-  flat=$(brctl show | sed -rne '/dummy1/s/^(brq[a-z0-9-]{11}).*dummy1$/\1/p')
-  brctl addif $flat $CFG_VPN_DEV
-  ifconfig $CFG_VPN_DEV up
-  sysctl -w net.bridge.bridge-nf-call-iptables=0
-  sysctl -w net.bridge.bridge-nf-call-ip6tables=0
-  ufw allow in on $flat
-else
-  ufw allow in on $CFG_VPN_DEV
-fi
-
 # start OpenVPN service
-service openvpn restart
+# (if the server reboots after this step then this is not needed)
+#service openvpn restart
 
 exit $STATE_REBOOT
 

@@ -20,7 +20,7 @@ cd $(dirname $0)
 # get the next step in the sequence
 #
 function get_step() {
-  echo $(ls $STAGES/??-* 2> /dev/null | head -1 | sed -e 's/.*\///')  
+  echo $(ls stages/??-* 2> /dev/null | head -1 | sed -e 's/.*\///')  
 }
 
 #
@@ -52,7 +52,7 @@ while [[ $DONE == 0 ]]; do
     TIME_STEP=$(date +"%s")
 
     # execute the step and get the return state
-    $STAGES/$STEP >${CFG_LOGDIR}/${STEP}.log 2>&1 
+    stages/$STEP >${CFG_LOGDIR}/${STEP}.log 2>&1 
     STATE=$?
 
     # sh -c "/bin/egrep -nr '^Failed:\s+[^0][1-9]+' 03-vinstall.sh.log "
@@ -70,7 +70,7 @@ while [[ $DONE == 0 ]]; do
       STEP=""
     else
       # disable current step and get the next step (if any)
-      mv $STAGES/$STEP $STAGES/done-$STEP
+      mv stages/$STEP stages/done-$STEP
       STEP=$(get_step)
     fi
   fi  

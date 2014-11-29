@@ -43,13 +43,15 @@ CFG_VPN_PORT=443
 CFG_VPN_PROT=tcp
 
 # if we use L3 VPN, this needs to be defined
+# (if L2 this *must* be a /24 or longer)
 CFG_VPN_L3_NET=172.16.4.0/24
 
 # if we use L2 VPN, we bridge the VPN clients into the FLAT network
 # LO and HI define the IP addresses in that network that will be used
 # for the VPN clients. DHCP pool usually starts at .50
-CFG_VPN_L2_LO=32
-CFG_VPN_L2_HI=48
+# (must be within the defined CFG_VPN_L3_NET)
+CFG_VPN_L2_LO=20
+CFG_VPN_L2_HI=39
 
 # what route do we want to push to the VPN client?
 # should contain a supernet of all networks used internally

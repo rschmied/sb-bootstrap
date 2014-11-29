@@ -2,26 +2,32 @@
 # common variables and functions
 #
 
-# some paths
+# define path
 PATH=/usr/sbin:/usr/bin:/sbin:/bin
-STAGES="stages"
 
-# return states for stage scripts
+# defines some return states for stage scripts
 STATE_OK=0
 STATE_REBOOT=1
 STATE_FATAL=-1
 
-# configurable things below with CFG_
+#######################################
+# configurable things below with CFG_ #
+#######################################
 
 # if Salt is not available. How often and for how long
-# do we wait until we give up?
+# do we wait until we give up? 12*10 = 120s = 2min
 CFG_MAXWAIT=12
 CFG_SLEEP=10
 
-# common settings
+# hostname / domain settings
 CFG_DOMAIN=virl.lab
-CFG_LOGDIR=/root
 CFG_HOSTNAME=$(hostname)
+
+# where do the install log files go?
+CFG_LOGDIR=/root
+
+# which port does SSH listen on?
+# (also configures firewall)
 CFG_SSH_PORT=22
 
 # this is where the resulting client config file will be written
@@ -53,15 +59,15 @@ CFG_VPN_ROUTE=172.16.0.0/22
 
 #
 # make sure we are connected to the master
-# before we continue
-# this will sleep forever if there's something wrong
-# with the key / connectivity
-# and it won't continue :)
+# before we continue (e.g key and connectivity are OK)
+# this will sleep as defined above in SLEEP and MAXWAIT
+# if time's up it will return STATE_FATAL and the installation
+# will abort!
 #
 function wait_for_salt () {
   waited=0
   while [[ $(sudo salt-call test.ping) =~ False ]]; do
-    echo "no Salt connectivity ... sleeping 10s"
+    echo "no Salt connectivity ... sleeping ${CFG_SLEEP}s"
     sleep $CFG_SLEEP
     waited=$(($waited+1))
     if [[ $waited = $CFG_MAXWAIT ]]; then

@@ -29,6 +29,21 @@ function print_cert () {
 }
 
 #
+# print the subnet mask based on the CIDR bits
+#
+function print_mask () {
+  echo $(python -c "import socket, struct; print socket.inet_ntoa(struct.pack(\">I\", (0xffffffff << (32 - $1)) & 0xffffffff))")
+}
+
+#
+# print the IPv4 network in $1 and replace the 
+# last octet with the octed in $2
+#
+function print_ipv4_net () {
+  echo $(echo -n $1 | cut -d. -f1-3)"."$2
+}
+
+#
 # install required packages
 #
 apt-get -y install  openvpn easy-rsa
@@ -50,7 +65,7 @@ sed -ri 's/(^export CA_EXPIRE=)(.*)/\1365/' ./vars
 ./clean-all
 ./pkitool --initca
 ./pkitool --server ${CFG_HOSTNAME}.${CFG_DOMAIN}
-./pkitool          virl-sandbox-client
+./pkitool virl-sandbox-client
 ./build-dh
 
 cd keys/
@@ -83,13 +98,21 @@ EOF
 
 # 
 # the networks here must match IP networks defined in /etc/virl.ini
-# also different start procedure required for tap vs tun
+# also different start procedure is required for tap vs tun
 #
 if [[ $CFG_VPN_DEV =~ tun ]]; then
-  echo "server 172.16.4.0 255.255.255.0" >>/etc/openvpn/server.conf
+  vpn_network=$(echo $CFG_VPN_L3_NET | cut -d/ -f1)
+  vpn_netcidr=$(echo $CFG_VPN_L3_NET | cut -d/ -f2)
+  vpn_netmask=$(print_mask $vpn_netcidr)
+  echo "server $vpn_network $vpn_netmask" >>/etc/openvpn/server.conf
   ufw allow in on $CFG_VPN_DEV
 else
-  echo "server-bridge 172.16.1.1 255.255.255.0 172.16.1.32 172.16.1.48" >>/etc/openvpn/server.conf
+  vpn_network=$(crudini --get /etc/virl.ini DEFAULT l2_network | cut -d/ -f1)
+  vpn_netcidr=$(crudini --get /etc/virl.ini DEFAULT l2_network | cut -d/ -f2)
+  vpn_netmask=$(print_mask $vpn_netcidr)
+  echo "server-bridge $vpn_network $vpn_netmask" \
+     "$(print_ipv4_net $vpn_network $CFG_VPN_L2_LO)" \
+     "$(print_ipv4_net $vpn_network $CFG_VPN_L2_HI)" >>/etc/openvpn/server.conf
   echo "up /etc/openvpn/bridge-up.sh" >>/etc/openvpn/server.conf
 
   cat >/etc/openvpn/bridge-up.sh <<EOF
@@ -136,7 +159,7 @@ exit
 EOF
   # make it executable
   chmod u+x /etc/openvpn/bridge-up.sh
-  # Change prio for OpenVPN start (default=16) but
+  # Change priority for OpenVPN start (default=16) but
   # at that time Neutron has not been started!
   # For the tap interface to come up successfully the
   # L3 Neutron Router Interfaces have to be configured first!
@@ -144,6 +167,15 @@ EOF
   update-rc.d -f openvpn remove
   update-rc.d openvpn start 99 2 3 4 5 . stop 80 0 1 6 .
 fi
+
+#
+# we need to push a route to the clients with a super net to 
+# all VIRL internal networks.
+#
+vpn_network=$(echo $CFG_VPN_ROUTE | cut -d/ -f1)
+vpn_netcidr=$(echo $CFG_VPN_ROUTE | cut -d/ -f2)
+vpn_netmask=$(print_mask $vpn_netcidr)
+echo "push \"route $vpn_network $vpn_netmask\"" >>/etc/openvpn/server.conf
 
 
 #

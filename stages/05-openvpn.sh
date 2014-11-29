@@ -66,11 +66,10 @@ port $CFG_VPN_PORT
 proto $CFG_VPN_PROT
 dev $CFG_VPN_DEV
 duplicate-cn
-ca   /etc/openvpn/ca.crt
+ca /etc/openvpn/ca.crt
+dh /etc/openvpn/dh2048.pem
+key /etc/openvpn/${CFG_HOSTNAME}.${CFG_DOMAIN}.key
 cert /etc/openvpn/${CFG_HOSTNAME}.${CFG_DOMAIN}.crt
-key  /etc/openvpn/${CFG_HOSTNAME}.${CFG_DOMAIN}.key
-dh   /etc/openvpn/dh2048.pem
-server 172.16.4.0 255.255.255.0
 max-clients 20
 keepalive 10 60
 persist-tun
@@ -82,7 +81,17 @@ EOF
 ## push "dhcp-option DNS 8.8.8.8"
 ## push "dhcp-option DOMAIN virl.lab"
 
+# IP address pool definition
+# must match IP networks defined in /etc/virl.ini
+if [[ $CFG_VPN_DEV =~ tun ]]; then
+  echo "server 172.16.4.0 255.255.255.0" >/etc/openvpn/server.conf
+else
+  echo "server-bridge 172.16.1.1 255.255.255.0 172.16.1.32 172.16.1.48" >/etc/openvpn/server.conf
+fi
 
+#
+# client config file
+#
 cat >$CFG_VPN_CONF <<EOF
 #  VIRL OpenVPN Client Configuration
 client
@@ -129,6 +138,21 @@ print_cert "ca" ca.crt >>$CFG_VPN_CONF
 print_cert "cert" virl-sandbox-client.crt >>$CFG_VPN_CONF
 print_cert "key" virl-sandbox-client.key >>$CFG_VPN_CONF
 
+
+#
+# if bridged interface, some more stuff required
+# bridge will be attached to FLAT == dummy1 interface
+#
+if [[ $CFG_VPN_DEV =~ tap ]]; then
+  flat=$(brctl show | sed -rne '/dummy1/s/^(brq[a-z0-9-]{11}).*dummy1$/\1/p')
+  brctl addif $flat $CFG_VPN_DEV
+  ifconfig $CFG_VPN_DEV up
+  sysctl -w net.bridge.bridge-nf-call-iptables=0
+  sysctl -w net.bridge.bridge-nf-call-ip6tables=0
+  ufw allow in on $flat
+else
+  ufw allow in on $CFG_VPN_DEV
+fi
 
 # start OpenVPN service
 service openvpn restart

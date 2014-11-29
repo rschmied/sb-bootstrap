@@ -136,6 +136,13 @@ exit
 EOF
   # make it executable
   chmod u+x /etc/openvpn/bridge-up.sh
+  # Change prio for OpenVPN start (default=16) but
+  # at that time Neutron has not been started!
+  # For the tap interface to come up successfully the
+  # L3 Neutron Router Interfaces have to be configured first!
+  # So we move the OpenVPN start to the end of the line.
+  update-rc.d -f openvpn remove
+  update-rc.d openvpn start 99 2 3 4 5 . stop 80 0 1 6 .
 fi
 
 

@@ -90,7 +90,6 @@ keepalive 10 60
 persist-tun
 verb 1
 mute 3
-push "route 172.16.0.0 255.255.252.0"
 EOF
 
 ## push "dhcp-option DNS 8.8.8.8"

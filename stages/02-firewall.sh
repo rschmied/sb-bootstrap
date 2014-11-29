@@ -55,8 +55,9 @@ COMMIT\n" /etc/ufw/before.rules
 #
 ufw allow in on $gw to any port $CFG_SSH_PORT proto tcp
 ufw allow in on $gw to any port $CFG_VPN_PORT proto $CFG_VPN_PROT
-ufw allow in on $CFG_VPN_DEV to any
 
+# firewall rule for VPN will be set in VPN stage
+# ufw allow in on $CFG_VPN_DEV
 # sudo grep '^### tuple' /lib/ufw/user*.rules
 
 #

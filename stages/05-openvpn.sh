@@ -100,12 +100,14 @@ EOF
 # also different start procedure is required for tap vs tun
 #
 if [[ $CFG_VPN_DEV =~ tun ]]; then
+  vpn_gateway=""  # no gateway needed for L3
   vpn_network=$(echo $CFG_VPN_L3_NET | cut -d/ -f1)
   vpn_netcidr=$(echo $CFG_VPN_L3_NET | cut -d/ -f2)
   vpn_netmask=$(print_mask $vpn_netcidr)
   echo "server $vpn_network $vpn_netmask" >>/etc/openvpn/server.conf
   ufw allow in on $CFG_VPN_DEV
 else
+  vpn_gateway=$(crudini --get /etc/virl.ini DEFAULT l2_network_gateway | cut -d/ -f1)
   vpn_network=$(crudini --get /etc/virl.ini DEFAULT l2_network | cut -d/ -f1)
   vpn_netcidr=$(crudini --get /etc/virl.ini DEFAULT l2_network | cut -d/ -f2)
   vpn_netmask=$(print_mask $vpn_netcidr)
@@ -174,7 +176,7 @@ fi
 vpn_network=$(echo $CFG_VPN_ROUTE | cut -d/ -f1)
 vpn_netcidr=$(echo $CFG_VPN_ROUTE | cut -d/ -f2)
 vpn_netmask=$(print_mask $vpn_netcidr)
-echo "push \"route $vpn_network $vpn_netmask\"" >>/etc/openvpn/server.conf
+echo "push \"route $vpn_network $vpn_netmask $vpn_gateway\"" >>/etc/openvpn/server.conf
 
 
 #

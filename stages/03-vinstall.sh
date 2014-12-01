@@ -18,5 +18,10 @@ wait_for_salt
 echo "install all remaining VIRL packages"
 /usr/local/bin/vinstall all
 
+# packages which are present (and required) in standard
+# Ubuntu server install but are missing on Rackspace.
+echo "install one-off packages"
+apt-get install ethtool
+
 exit $STATE_OK
 

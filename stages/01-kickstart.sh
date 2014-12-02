@@ -58,7 +58,19 @@ openssl rsa -in ./preseed_keys/minion.pem -pubout >./preseed_keys/minion.pub
 cp -f ./preseed_keys/minion.pem /etc/salt/pki/minion/minion.pem
 cp -f ./preseed_keys/minion.pub /etc/salt/pki/minion/minion.pub
 chmod 400 /etc/salt/pki/minion/minion.pem
-sh /home/virl/virl-bootstrap/bootstrap-salt.sh git 2014.7
+
+#
+# install Salt
+#
+sh /home/virl/virl-bootstrap/bootstrap-salt.sh git stable
+if [[ $(salt-minion --version) =~ ^salt-minion\ 2014.7.0.*\ \(Helium\)$ ]]; then 
+  echo "Expected Salt Version 2014.7.0 Helium installed"
+else
+  echo "Salt version not correct... trying to rectify..."
+  apt-get update && apt-get upgrade salt-minion salt-common -y
+  echo "Check what we have now:"
+  salt-minion --version
+fi
 
 # check that Salt is available and key is OK
 wait_for_salt

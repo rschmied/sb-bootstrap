@@ -42,6 +42,7 @@ TIME_BORN=$(./born.py)
 DONE=0
 BOOT_NEEDED=0
 while [[ $DONE == 0 ]]; do
+  STATE=$STATE_OK
   STEP=$(get_step)
   if [ "$STEP" != "" ]; then
     echo  
@@ -80,7 +81,7 @@ while [[ $DONE == 0 ]]; do
   # there is no pending reboot...
   # If yes: Make sure we are never invoked again.  
   #  
-  if [[ "$STEP" == "" && "$STATE" != "$STATE_REBOOT" ]]; then
+  if [[ "$STEP" == "" && $STATE != $STATE_REBOOT ]]; then
     echo  
     echo "No more steps -- removing us from rc.local"  
     echo "=============================================================================="  
@@ -89,13 +90,28 @@ while [[ $DONE == 0 ]]; do
     TIME_NOW=$(date +"%s")
     print_timediff $TIME_BORN $TIME_NOW "Total time to install:"
     DONE=1
+
+    #
+    # Check for failed Salt states
+    # we expect it to be less or equal than CFG_MAX_FAIL 
+    #
+    fails=0
+    failed=$(sed -nre '/Failed:\s+/s/(^Failed:\s+)([0-9]+)/\2/p' ${CFG_LOGDIR}/??-*.log)
+    for num in $failed; do
+      fails=$(( $fails + $num ))
+    done
+    if [ $fails -gt $CFG_MAX_FAIL ]; then 
+      echo "**** SALT   ERROR ****"
+      echo "check state log files!"
+    fi
+
   fi  
 
   #
   # if the reboot flag is set
   # do a reboot, otherwise just stop
   #
-  if [[ "$STATE" == "$STATE_REBOOT" ]]; then
+  if [ $STATE -eq $STATE_REBOOT ]; then
     DONE=1
     echo "Rebooting in 10 seconds..."
     sleep 10  
@@ -103,3 +119,4 @@ while [[ $DONE == 0 ]]; do
   fi
 
 done
+

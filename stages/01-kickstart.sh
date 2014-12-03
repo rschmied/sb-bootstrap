@@ -62,7 +62,7 @@ chmod 400 /etc/salt/pki/minion/minion.pem
 #
 # install Salt
 #
-sh /home/virl/virl-bootstrap/bootstrap-salt.sh git stable
+sh /home/virl/virl-bootstrap/bootstrap-salt.sh stable
 if [[ $(salt-minion --version) =~ ^salt-minion\ 2014.7.0.*\ \(Helium\)$ ]]; then 
   echo "Expected Salt Version 2014.7.0 Helium installed"
 else

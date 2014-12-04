@@ -11,7 +11,7 @@ STATE_REBOOT=1
 STATE_FATAL=-1
 
 # how many known Salt states that fail?
-CFG_MAX_FAIL=2
+CFG_MAX_FAIL=1
 
 
 #######################################
@@ -38,9 +38,9 @@ CFG_SSH_PORT=22
 CFG_VPN_CONF=/home/virl/vpn-client.ovpn
 
 # what VPN device are we using?
-# tun0 --> L3 VPN, CFG_VPN_L3_NET needs to be defined
-# tap0 --> L2 VPN, CFG_VPN_L2_LO and CFG_VPN_L2_HI needs to be defined
-CFG_VPN_DEV=tun0
+# tun --> L3 VPN, CFG_VPN_L3_NET needs to be defined
+# tap --> L2 VPN, CFG_VPN_L2_LO and CFG_VPN_L2_HI needs to be defined
+CFG_VPN_DEV=tap
 
 # Port number and Protocol (udp/tcp) for OpenVPN 
 CFG_VPN_PORT=443

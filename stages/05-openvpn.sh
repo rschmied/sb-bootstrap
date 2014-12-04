@@ -79,7 +79,7 @@ cp ca.crt ${CFG_HOSTNAME}.${CFG_DOMAIN}.* dh*.pem  /etc/openvpn/
 cat >/etc/openvpn/server.conf <<EOF
 port $CFG_VPN_PORT
 proto $CFG_VPN_PROT
-dev $CFG_VPN_DEV
+dev ${CFG_VPN_DEV}0
 duplicate-cn
 ca /etc/openvpn/ca.crt
 dh /etc/openvpn/dh2048.pem
@@ -105,7 +105,7 @@ if [[ $CFG_VPN_DEV =~ tun ]]; then
   vpn_netcidr=$(echo $CFG_VPN_L3_NET | cut -d/ -f2)
   vpn_netmask=$(print_mask $vpn_netcidr)
   echo "server $vpn_network $vpn_netmask" >>/etc/openvpn/server.conf
-  ufw allow in on $CFG_VPN_DEV
+  ufw allow in on ${CFG_VPN_DEV}0
 else
   vpn_gateway=$(crudini --get /etc/virl.ini DEFAULT l2_network_gateway | cut -d/ -f1)
   vpn_network=$(crudini --get /etc/virl.ini DEFAULT l2_network | cut -d/ -f1)

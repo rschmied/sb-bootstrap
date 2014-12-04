@@ -61,6 +61,15 @@ ufw allow in on $gw to any port $CFG_VPN_PORT proto $CFG_VPN_PROT
 # sudo grep '^### tuple' /lib/ufw/user*.rules
 
 #
+# This is Rackspace specific:
+# If we do have a bond0.401 interface then we deny traffic coming in 
+#
+if [[ $(ifconfig) =~ bond0.401 && $gw != bond0.401 ]]; then
+  echo 'Rackspace private network detected'
+  ufw deny in on bond0.401
+fi
+
+#
 # enabling the FW will make it persistent
 # across reboots!
 #

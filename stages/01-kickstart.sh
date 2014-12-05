@@ -35,6 +35,9 @@ chown -R virl.virl /home/virl/.ssh/
 # move virl.ini to its place
 cp ../etc/virl.ini /etc/
 
+# need crudini upfron
+apt-get -y install crudini
+
 # swap the key ID and domain in virl.ini
 SALT_DOMAIN=$(basename /tmp/*.pem | cut -d. -f2,3)
 SALT_ID=$(basename /tmp/*.pem | cut -d. -f1)
@@ -84,7 +87,7 @@ master_type: failover
 verify_master_pubkey_sign: True 
 master_shuffle: True 
 master_alive_interval: 180 
-EOF 
+EOF
 
 #
 # install Salt

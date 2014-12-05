@@ -35,8 +35,21 @@ chown -R virl.virl /home/virl/.ssh/
 # move virl.ini to its place
 cp ../etc/virl.ini /etc/
 
+# swap the key ID and domain in virl.ini
+SALT_DOMAIN=$(basename /tmp/*.pem | cut -d. -f2,3)
+SALT_ID=$(basename /tmp/*.pem | cut -d. -f1)
+crudini --set /etc/virl.ini DEFAULT salt_master "$CFG_SALTMASTER"
+crudini --set /etc/virl.ini DEFAULT salt_id $SALT_ID
+crudini --set /etc/virl.ini DEFAULT salt_domain $SALT_DOMAIN
+crudini --set /etc/virl.ini DEFAULT hostname $CFG_HOSTNAME
+crudini --set /etc/virl.ini DEFAULT domain $CFG_DOMAIN
+
+
 # clone the VIRL boot strap
-su -c "git clone https://github.com/VIRL-Open/virl-bootstrap.git" - virl
+# forked from 
+# https://github.com/VIRL-Open/virl-bootstrap.git
+
+su -c "git clone https://github.com/rschmied/virl-bootstrap.git" - virl
 if [ ! -x /home/virl/virl-bootstrap/virl-bootstrap.py ]; then
   echo "no VIRL bootstrap repo from Git available!"
   echo "Bail out, serious Salt connectivity problem!"
@@ -60,6 +73,20 @@ cp -f ./preseed_keys/minion.pub /etc/salt/pki/minion/minion.pub
 chmod 400 /etc/salt/pki/minion/minion.pem
 
 #
+# write the /etc/salt/minion.d/extra.conf
+#
+mkdir -p /etc/salt/minion.d/
+cat >/etc/salt/minion.d/extra.conf <<EOF
+master: [ $CFG_SALTMASTER ]
+id: $SALT_ID
+append_domain: $SALT_DOMAIN
+master_type: failover 
+verify_master_pubkey_sign: True 
+master_shuffle: True 
+master_alive_interval: 180 
+EOF 
+
+#
 # install Salt
 #
 sh /home/virl/virl-bootstrap/bootstrap-salt.sh stable
@@ -80,15 +107,6 @@ cp /etc/network/interfaces /root/interfaces
 
 # do ZERO
 salt-call state.sls zero
-
-# swap the key ID and domain in virl.ini
-SALT_DOMAIN=$(basename /tmp/*.pem | cut -d. -f2,3)
-SALT_ID=$(basename /tmp/*.pem | cut -d. -f1)
-crudini --set /etc/virl.ini DEFAULT salt_master "$CFG_SALTMASTER"
-crudini --set /etc/virl.ini DEFAULT salt_id $SALT_ID
-crudini --set /etc/virl.ini DEFAULT salt_domain $SALT_DOMAIN
-crudini --set /etc/virl.ini DEFAULT hostname $CFG_HOSTNAME
-crudini --set /etc/virl.ini DEFAULT domain $CFG_DOMAIN
 
 # install salt stuff
 if [ -f /etc/salt/grains ]; then

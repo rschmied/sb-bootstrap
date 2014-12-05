@@ -26,6 +26,7 @@ CFG_SLEEP=10
 # hostname / domain settings
 CFG_DOMAIN=virl.lab
 CFG_HOSTNAME=$(hostname)
+CFG_SALTMASTER="salt-master-2.cisco.com, salt-master.cisco.com"
 
 # where do the install log files go?
 CFG_LOGDIR=/root

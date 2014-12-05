@@ -37,6 +37,7 @@ su -lc 'PS1=xxx; . ~/.bashrc; neutron subnet-update guest --dns_nameservers list
 # VMM connects to interface w/ default route (external interface)
 # in this case we want it to show the internal interface
 crudini --set /etc/virl/virl.cfg env virl_local_ip 172.16.1.1
+crudini --set /etc/virl/virl.cfg env virl_std_process_count 20
 
 # don't start the dummy0 interface, unused
 # in our case

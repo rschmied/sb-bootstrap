@@ -84,6 +84,7 @@ salt-call state.sls zero
 # swap the key ID and domain in virl.ini
 SALT_DOMAIN=$(basename /tmp/*.pem | cut -d. -f2,3)
 SALT_ID=$(basename /tmp/*.pem | cut -d. -f1)
+crudini --set /etc/virl.ini DEFAULT salt_master "$CFG_SALTMASTER"
 crudini --set /etc/virl.ini DEFAULT salt_id $SALT_ID
 crudini --set /etc/virl.ini DEFAULT salt_domain $SALT_DOMAIN
 crudini --set /etc/virl.ini DEFAULT hostname $CFG_HOSTNAME

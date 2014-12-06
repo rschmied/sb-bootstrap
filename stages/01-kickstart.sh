@@ -35,7 +35,7 @@ chown -R virl.virl /home/virl/.ssh/
 # move virl.ini to its place
 cp ../etc/virl.ini /etc/
 
-# need crudini upfron
+# need crudini upfront
 apt-get -y install crudini
 
 # swap the key ID and domain in virl.ini

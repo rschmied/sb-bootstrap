@@ -39,10 +39,6 @@ su -lc 'PS1=xxx; . ~/.bashrc; neutron subnet-update guest --dns_nameservers list
 crudini --set /etc/virl/virl.cfg env virl_local_ip 172.16.1.1
 crudini --set /etc/virl/virl.cfg env virl_std_process_count 20
 
-# don't start the dummy0 interface, unused
-# in our case
-sed -i '/auto dummy0/d' /etc/network/interfaces
-
 # restart openstack services (to avoid a restart)
 # echo "restarting OpenStack services"
 # salt-call state.sls openstack-restart

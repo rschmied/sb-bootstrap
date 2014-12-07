@@ -16,15 +16,23 @@
 cd $(dirname $0)
 . ../etc/common.sh 
 
+#
 # add our hostname to localhost
+#
 sed -i 's/^127.0.0.1 localhost$/& '$CFG_HOSTNAME' '$CFG_HOSTNAME'.'$CFG_DOMAIN'/' /etc/hosts
 
+#
 # create the VIRL user 'virl'
 # we don't want a password (use the root key instead)
+#
 useradd -m virl
 usermod -a -G sudo virl
+
+#
 # standard cloud image has an ubuntu user
 # on Rackspace, it is the root user
+# copy the initial SSH keys to the virl user
+#
 if [ -d /home/ubuntu ]; then
   cp -R /home/ubuntu/.ssh/ /home/virl/
 else
@@ -32,39 +40,31 @@ else
 fi
 chown -R virl.virl /home/virl/.ssh/
 
+#
 # move virl.ini to its place
+#
 cp ../etc/virl.ini /etc/
 
-# need crudini upfront
-apt-get -y install crudini
-
-# swap the key ID and domain in virl.ini
-SALT_DOMAIN=$(basename /tmp/*.pem | cut -d. -f2,3)
-SALT_ID=$(basename /tmp/*.pem | cut -d. -f1)
-crudini --set /etc/virl.ini DEFAULT salt_master "$CFG_SALTMASTER"
-crudini --set /etc/virl.ini DEFAULT salt_id $SALT_ID
-crudini --set /etc/virl.ini DEFAULT salt_domain $SALT_DOMAIN
-crudini --set /etc/virl.ini DEFAULT hostname $CFG_HOSTNAME
-crudini --set /etc/virl.ini DEFAULT domain $CFG_DOMAIN
-
-
+#
 # clone the VIRL boot strap
-# forked from 
-# https://github.com/VIRL-Open/virl-bootstrap.git
-
+# forked from https://github.com/VIRL-Open/virl-bootstrap.git
+#
 su -c "git clone https://github.com/rschmied/virl-bootstrap.git" - virl
 if [ ! -x /home/virl/virl-bootstrap/virl-bootstrap.py ]; then
   echo "no VIRL bootstrap repo from Git available!"
-  echo "Bail out, serious Salt connectivity problem!"
+  echo "Bail out, serious connectivity problem!"
+  echo "**** FATAL  ERROR ****"
+  echo "check state log files!"
   exit $STATE_FATAL
 fi
 
-# now as root
-# copy and prep private
-# bootstrap the salt minion
+#
+# as root, bootstrap the Salt minion
+#
 cd /home/virl/virl-bootstrap
 
-# do the salt minion pub/private key stuff
+#
+# do the Salt minion pub/private key stuff
 #
 mkdir -p /etc/salt/pki/minion
 cp ./master_sign.pub /etc/salt/pki/minion
@@ -78,6 +78,8 @@ chmod 400 /etc/salt/pki/minion/minion.pem
 #
 # write the /etc/salt/minion.d/extra.conf
 #
+SALT_DOMAIN=$(basename /tmp/*.pem | cut -d. -f2,3)
+SALT_ID=$(basename /tmp/*.pem | cut -d. -f1)
 mkdir -p /etc/salt/minion.d/
 cat >/etc/salt/minion.d/extra.conf <<EOF
 master: [ $CFG_SALTMASTER ]
@@ -111,6 +113,13 @@ cp /etc/network/interfaces /root/interfaces
 # do ZERO
 salt-call state.sls zero
 
+# set the required Salt vars in virl.ini
+crudini --set /etc/virl.ini DEFAULT salt_master "$CFG_SALTMASTER"
+crudini --set /etc/virl.ini DEFAULT salt_id $SALT_ID
+crudini --set /etc/virl.ini DEFAULT salt_domain $SALT_DOMAIN
+crudini --set /etc/virl.ini DEFAULT hostname $CFG_HOSTNAME
+crudini --set /etc/virl.ini DEFAULT domain $CFG_DOMAIN
+
 # install salt stuff
 if [ -f /etc/salt/grains ]; then
   rm /etc/salt/grains
@@ -128,6 +137,9 @@ cp /root/interfaces /etc/network/interfaces
 cat /etc/network/interfaces-virl | \
   sed -e '/^auto lo/d;/^iface lo inet loopback/d' \
   >>/etc/network/interfaces
+
+# don't start the dummy0 interface, unused in our case
+sed -i '/auto dummy0/d' /etc/network/interfaces
 
 # reboot required after FW is in place (next step)
 

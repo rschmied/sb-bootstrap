@@ -27,6 +27,8 @@ sed -i 's/^127.0.0.1 localhost$/& '$CFG_HOSTNAME' '$CFG_HOSTNAME'.'$CFG_DOMAIN'/
 #
 useradd -m virl
 usermod -a -G sudo virl
+usermod -a -G libvirtd virl
+echo "export LIBVIRT_DEFAULT_URI=qemu:///system" >>/home/virl/.bashrc
 
 #
 # standard cloud image has an ubuntu user

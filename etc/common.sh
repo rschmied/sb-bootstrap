@@ -73,14 +73,21 @@ CFG_VPN_ROUTE=172.16.0.0/22
 #
 function wait_for_salt () {
   waited=0
-  while [[ $(sudo salt-call test.ping) =~ False ]]; do
-    echo "no Salt connectivity ... sleeping ${CFG_SLEEP}s"
-    sleep $CFG_SLEEP
-    waited=$(($waited+1))
-    if [[ $waited = $CFG_MAXWAIT ]]; then
+  while true; do
+    salt_status=$(sudo salt-call 2>&1 test.ping)
+    if [[ $salt_status =~ CRITICAL || $waited = $CFG_MAXWAIT ]]; then
       echo "Bail out, serious Salt connectivity problem!"
       exit $STATE_FATAL
+    elif [[ $salt_status =~ True ]]; then
+      echo "Salt connectivity is OK"
+      break
+    else
+      echo "no Salt connectivity ... sleeping ${CFG_SLEEP}s"
+      sleep $CFG_SLEEP
+      waited=$(($waited+1))
     fi
   done
 }
+
+
 

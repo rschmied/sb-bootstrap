@@ -90,21 +90,6 @@ while [[ $DONE == 0 ]]; do
     TIME_NOW=$(date +"%s")
     print_timediff $TIME_BORN $TIME_NOW "Total time to install:"
     DONE=1
-
-    #
-    # Check for failed Salt states
-    # we expect it to be less or equal than CFG_MAX_FAIL 
-    #
-    fails=0
-    failed=$(sed -nre '/Failed:\s+/s/(^Failed:\s+)([0-9]+)/\2/p' ${CFG_LOGDIR}/??-*.log)
-    for num in $failed; do
-      fails=$(( $fails + $num ))
-    done
-    if [ $fails -gt $CFG_MAX_FAIL ]; then 
-      echo "**** SALT   ERROR ****"
-      echo "check state log files!"
-    fi
-
   fi  
 
   #

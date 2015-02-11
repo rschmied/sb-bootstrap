@@ -10,9 +10,6 @@ STATE_OK=0
 STATE_REBOOT=1
 STATE_FATAL=-1
 
-# how many known Salt states that fail?
-CFG_MAX_FAIL=1
-
 
 #######################################
 # configurable things below with CFG_ #

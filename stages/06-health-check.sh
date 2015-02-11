@@ -13,8 +13,7 @@
 cd $(dirname $0)
 . ../etc/common.sh 
 
-OK_STRINGS='
-MySQL is available
+OK_STRINGS='MySQL is available
 RabbitMQ configured for Nova is available
 RabbitMQ configured for Glance and Neutron is available
 OpenStack identity service for STD is available
@@ -25,13 +24,21 @@ STD server on url http://localhost:19399 is listening, server version [0-9\.]+$
 UWM server on url http://localhost:19400 is listening, server version [0-9\.]+$
 "product-expires": 7,
 "kvm-ok": "INFO: /dev/kvm exists\\nKVM acceleration can be used"
-"autonetkit-version": "autonetkit [0-9\.]+",
-'
+"autonetkit-version": "autonetkit [0-9\.]+",'
+
+IMAGES='CSR1000v
+IOS XRv
+IOSv
+NX-OSv
+server'
+
+
 
 CHECK=0
 OK=0
 HEALTH=/usr/local/bin/virl_health_status
 NEUTRON=/usr/bin/neutron
+GLANCE=/usr/bin/glance
 OPENVPN=/usr/sbin/openvpn
 VPNCLIENTFILE=/home/virl/vpn-client.ovpn
 VPNCLIENTLINES=131
@@ -39,7 +46,8 @@ VPNCLIENTLINES=131
 # do checks against virl_health_status
 if [ -x $HEALTH ]; then 
 	TEMPFILE=$(mktemp -t health-XXXXXXXXXXX)
-	$HEALTH >$TEMPFILE
+	chmod 666 $TEMPFILE
+	su -lc "PS1=xxx; . ~/.bashrc; sudo $HEALTH >$TEMPFILE" virl
 	while IFS= read -r line; do
 		CHECK=$((CHECK + 1))
 		if grep -Eqe "$line" $TEMPFILE ; then
@@ -52,6 +60,25 @@ if [ -x $HEALTH ]; then
 else
 	CHECK=1
 	echo "*** No virl_health_status"
+fi
+
+# check glance image list
+if [ -x $GLANCE ]; then 
+	TEMPFILE=$(mktemp -t glance-XXXXXXXXXXX)
+	chmod 666 $TEMPFILE
+	su -lc "PS1=xxx; . ~/.bashrc; $GLANCE image-list >$TEMPFILE" virl
+	while IFS= read -r line; do
+		CHECK=$((CHECK + 1))
+		if grep -Eqe "$line.*active" $TEMPFILE ; then
+			OK=$((OK + 1))
+		else
+			echo "*** No Image:" $line
+		fi
+	done <<<"$IMAGES"
+	rm $TEMPFILE
+else
+	CHECK=1
+	echo "*** No glance"
 fi
 
 # do specific Neutron checks

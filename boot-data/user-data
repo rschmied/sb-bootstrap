@@ -39,4 +39,3 @@ write_files:
   content: |
     CFG_VPN_PORT=443
   permissions: '0644'
-

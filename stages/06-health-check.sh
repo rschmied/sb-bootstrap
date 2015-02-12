@@ -32,8 +32,6 @@ IOSv
 NX-OSv
 server'
 
-
-
 CHECK=0
 OK=0
 HEALTH=/usr/local/bin/virl_health_status
@@ -42,24 +40,30 @@ GLANCE=/usr/bin/glance
 OPENVPN=/usr/sbin/openvpn
 VPNCLIENTFILE=/home/virl/vpn-client.ovpn
 VPNCLIENTLINES=131
+VMMAESTRODIR=/var/www/download/
+VMMAESTRONUM=4
 
 # do checks against virl_health_status
 if [ -x $HEALTH ]; then 
 	TEMPFILE=$(mktemp -t health-XXXXXXXXXXX)
 	chmod 666 $TEMPFILE
+	echo -n "CHECK: [Running virl_health_status...]"
 	su -lc "PS1=xxx; . ~/.bashrc; sudo $HEALTH >$TEMPFILE" virl
+	echo -e "\r OK  "
 	while IFS= read -r line; do
 		CHECK=$((CHECK + 1))
+		echo -en "CHECK: [$line]"
 		if grep -Eqe "$line" $TEMPFILE ; then
+			echo -e "\r OK  "
 			OK=$((OK + 1))
 		else
-			echo "*** No Match:" $line
+			echo -e "\r ERR "
 		fi
 	done <<<"$OK_STRINGS"
 	rm $TEMPFILE
 else
 	CHECK=1
-	echo "*** No virl_health_status"
+	echo " ERR : No virl_health_status"
 fi
 
 # check glance image list
@@ -69,53 +73,75 @@ if [ -x $GLANCE ]; then
 	su -lc "PS1=xxx; . ~/.bashrc; $GLANCE image-list >$TEMPFILE" virl
 	while IFS= read -r line; do
 		CHECK=$((CHECK + 1))
+	    echo -en "CHECK: [Glance image $line]"
 		if grep -Eqe "$line.*active" $TEMPFILE ; then
+            echo -e "\r OK  "
 			OK=$((OK + 1))
 		else
-			echo "*** No Image:" $line
+            echo -e "\r ERR "
 		fi
 	done <<<"$IMAGES"
 	rm $TEMPFILE
 else
 	CHECK=1
-	echo "*** No glance"
+	echo " ERR : No glance"
+fi
+
+# check VM Maestro binaries
+if [ -d $VMMAESTRODIR ]; then
+    CHECK=$((CHECK + 1))
+    echo -en "CHECK: [VM Maestro binaries]"
+    if [ $(ls $VMMAESTRODIR | wc -l) -eq $VMMAESTRONUM ]; then
+        echo -e "\r OK  "
+        OK=$((OK + 1))
+    else
+        echo -e "\r ERR "
+    fi
+else
+    echo " ERR : no download directory found"
 fi
 
 # do specific Neutron checks
 # (contained in virl_health_status but not single line checks)
 if [ -x $NEUTRON ]; then
 	CHECK=$((CHECK + 1))
+    echo -en "CHECK: [Neutron Agents]"
 	if [ $(su -lc "PS1=xxx; . ~/.bashrc; $NEUTRON agent-list -f csv" virl | grep '":-)",True' | wc -l) -eq 4 ]; then 
+        echo -e "\r OK  "
 		OK=$((OK + 1))
 	else
-		echo "*** (some) Neutron Agents are missing"
+        echo -e "\r ERR "
 	fi
 else
-	echo "*** no Neutron Agent found"
+	echo " ERR : no Neutron Agent found"
 fi
 
 # do specific OpenVPN checks
 if [ -x $OPENVPN ]; then
 	CHECK=$((CHECK + 1))
+    echo -en "CHECK: [OpenVPN service]"
 	if [[ "$(service openvpn status)" =~  " * VPN 'server' is running" ]]; then
+        echo -e "\r OK  "
 		OK=$((OK + 1))
 	else
-		echo "*** VPN service inoperational"
+        echo -e "\r ERR "
 	fi
 else
-	echo "*** no OpenVPN service found"
+	echo " ERR : no OpenVPN service found"
 fi
 
 # check OpenVPN client config file
 if [ -f $VPNCLIENTFILE ]; then
 	CHECK=$((CHECK + 1))
+    echo -en "CHECK: [OpenVPN client config file]"
 	if [ $(cat $VPNCLIENTFILE | wc -l) -eq $VPNCLIENTLINES ]; then 
+        echo -e "\r OK  "
 		OK=$((OK + 1))
 	else
-		echo "*** VPN Client file has unexpected length"
+        echo -e "\r ERR "
 	fi
 else
-	echo "*** no OpenVPN client config found"
+	echo " ERR : no OpenVPN client config found"
 fi
 
 # if we have more checks than OKs then

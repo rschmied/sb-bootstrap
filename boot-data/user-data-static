@@ -1,0 +1,44 @@
+#cloud-config
+
+hostname: virl-sandbox 
+
+package_upgrade: true
+
+packages:
+- git
+
+runcmd:
+- [ sh, /root/boot.sh ]
+
+ssh_authorized_keys:
+ - ssh-rsa some-extra-key-data-line
+
+write_files:
+- path: /root/boot.sh
+  owner: root:root
+  content: |
+    #!/bin/bash
+    RCLOCAL=/etc/rc.local
+    cd /root
+    git clone https://github.com/rschmied/sb-bootstrap.git
+    if [ -x /root/sb-bootstrap/install.sh ]; then
+      if [ $(cat $RCLOCAL | sed '/^\s*$/d' | /usr/bin/wc -l) = 0 ]; then
+        echo "#!/bin/sh -e" >$RCLOCAL
+        echo "exit 0" >>$RCLOCAL
+        chmod u+x $RCLOCAL
+      fi
+      if [ -f /tmp/config ]; then
+        echo "custom config will be appended"
+        cat /tmp/config >>/root/sb-bootstrap/etc/common.sh
+      fi
+      sed -rie "\$s/(.*)/\/root\/sb-bootstrap\/install.sh >>\/root\/bootstrap.log 2>\&1; \1; ###BOOTSTRAP###/" $RCLOCAL
+      /root/sb-bootstrap/install.sh >/root/bootstrap.log 2>&1 &
+    fi
+  permissions: '0511'
+- path: /tmp/config
+  owner: root:root
+  content: |
+    CFG_VPN_PORT=443
+    CFG_VPN_PROT=tcp
+    CFG_VPN_DEV=tap
+  permissions: '0644'

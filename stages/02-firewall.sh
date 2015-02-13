@@ -37,13 +37,22 @@ gw=$(ip route | awk '/^default / { for(i=0;i<NF;i++) { if ($i == "dev") { print 
 # using the ufw CLI
 # (added content runs to the COMMIT\n line)
 #
+# previous version had
+#
+# Forward traffic through $gw\n\
+#-A POSTROUTING -s 172.16.0.0/22 -o $gw -j MASQUERADE\n\
+#-A POSTROUTING -s 172.16.4.0/24 -o $gw -j MASQUERADE\n\
+# that didn't work for the private network, had
+# to remove the -o interface to apply translation to
+# all interfaces (public and private)
+#
+
 sed -ie "/^\*filter/i\
 *nat\n\
 :POSTROUTING ACCEPT [0:0]\n\
 \n\
-# Forward traffic through $gw\n\
--A POSTROUTING -s 172.16.0.0/22 -o $gw -j MASQUERADE\n\
--A POSTROUTING -s 172.16.4.0/24 -o $gw -j MASQUERADE\n\
+# translate outbound traffic from internal networks \n\
+-A POSTROUTING -s 172.16.0.0/22 -j MASQUERADE\n\
 \n\
 # don't delete the 'COMMIT' line or these nat table rules won't\n\
 # be processed\n\

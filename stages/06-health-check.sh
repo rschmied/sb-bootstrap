@@ -1,6 +1,12 @@
 #!/bin/bash
 #
-# check VIRL installation as the final step
+# since service openvpn will block the boot process until
+# the Neutron bridges are up we can be sure that we will
+# only reach the final health check stage (started from
+# /etc/rc.local) after the system came up completely 
+# including Nova, STD, ANK and Neutron services / agents.
+#
+# Check VIRL installation as the final step
 # do various 'healt checks'
 # - check strings are contained in virl_health_status
 # - check Neutron agents

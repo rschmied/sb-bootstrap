@@ -143,7 +143,9 @@ cat /etc/network/interfaces-virl | \
 # don't start the dummy0 interface, unused in our case
 sed -i '/auto dummy0/d' /etc/network/interfaces
 
-# reboot required after FW is in place (next step)
+# fix pip
+easy_install -U pip
 
+# reboot required after FW is in place (next step)
 exit $STATE_OK
 

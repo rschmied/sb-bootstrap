@@ -21,16 +21,16 @@ cd $(dirname $0)
 
 OK_STRINGS='MySQL is available
 RabbitMQ configured for Nova is available
-RabbitMQ configured for Glance and Neutron is available
+(RabbitMQ configured for (Glance and Neutron|Neutron and Glance) is available)
 OpenStack identity service for STD is available
 OpenStack image service for STD is available
 OpenStack compute service for STD is available
 OpenStack network service for STD is available
 STD server on url http://localhost:19399 is listening, server version [0-9\.]+$
 UWM server on url http://localhost:19400 is listening, server version [0-9\.]+$
-"product-expires": 7,
+"product-expires": 7
 "kvm-ok": "INFO: /dev/kvm exists\\nKVM acceleration can be used"
-"autonetkit-version": "autonetkit [0-9\.]+",'
+"autonetkit-version": "autonetkit [0-9\.]+"'
 
 IMAGES='CSR1000v
 IOS XRv

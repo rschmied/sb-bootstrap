@@ -79,12 +79,12 @@ if [ -x $GLANCE ]; then
 	su -lc "PS1=xxx; . ~/.bashrc; $GLANCE image-list >$TEMPFILE" virl
 	while IFS= read -r line; do
 		CHECK=$((CHECK + 1))
-	    echo -en "CHECK: [Glance image $line]"
+		echo -en "CHECK: [Glance image $line]"
 		if grep -Eqe "$line.*active" $TEMPFILE ; then
-            echo -e "\r OK  "
+			echo -e "\r OK  "
 			OK=$((OK + 1))
 		else
-            echo -e "\r ERR "
+			echo -e "\r ERR "
 		fi
 	done <<<"$IMAGES"
 	rm $TEMPFILE
@@ -95,28 +95,28 @@ fi
 
 # check VM Maestro binaries
 if [ -d $VMMAESTRODIR ]; then
-    CHECK=$((CHECK + 1))
-    echo -en "CHECK: [VM Maestro binaries]"
-    if [ $(ls $VMMAESTRODIR | wc -l) -eq $VMMAESTRONUM ]; then
-        echo -e "\r OK  "
-        OK=$((OK + 1))
-    else
-        echo -e "\r ERR "
-    fi
+	CHECK=$((CHECK + 1))
+	echo -en "CHECK: [VM Maestro binaries]"
+	if [ $(ls $VMMAESTRODIR | wc -l) -eq $VMMAESTRONUM ]; then
+		echo -e "\r OK  "
+		OK=$((OK + 1))
+	else
+		echo -e "\r ERR "
+	fi
 else
-    echo " ERR : no download directory found"
+	echo " ERR : no download directory found"
 fi
 
 # do specific Neutron checks
 # (contained in virl_health_status but not single line checks)
 if [ -x $NEUTRON ]; then
 	CHECK=$((CHECK + 1))
-    echo -en "CHECK: [Neutron Agents]"
+	echo -en "CHECK: [Neutron Agents]"
 	if [ $(su -lc "PS1=xxx; . ~/.bashrc; $NEUTRON agent-list -f csv" virl | grep '":-)",True' | wc -l) -eq 4 ]; then 
-        echo -e "\r OK  "
+		echo -e "\r OK  "
 		OK=$((OK + 1))
 	else
-        echo -e "\r ERR "
+		echo -e "\r ERR "
 	fi
 else
 	echo " ERR : no Neutron Agent found"
@@ -125,12 +125,12 @@ fi
 # do specific OpenVPN checks
 if [ -x $OPENVPN ]; then
 	CHECK=$((CHECK + 1))
-    echo -en "CHECK: [OpenVPN service]"
+	echo -en "CHECK: [OpenVPN service]"
 	if [[ "$(service openvpn status)" =~  " * VPN 'server' is running" ]]; then
-        echo -e "\r OK  "
+		echo -e "\r OK  "
 		OK=$((OK + 1))
 	else
-        echo -e "\r ERR "
+		echo -e "\r ERR "
 	fi
 else
 	echo " ERR : no OpenVPN service found"
@@ -139,12 +139,12 @@ fi
 # check OpenVPN client config file
 if [ -f $VPNCLIENTFILE ]; then
 	CHECK=$((CHECK + 1))
-    echo -en "CHECK: [OpenVPN client config file]"
+	echo -en "CHECK: [OpenVPN client config file]"
 	if [ $(cat $VPNCLIENTFILE | wc -l) -eq $VPNCLIENTLINES ]; then 
-        echo -e "\r OK  "
+		echo -e "\r OK  "
 		OK=$((OK + 1))
 	else
-        echo -e "\r ERR "
+		echo -e "\r ERR "
 	fi
 else
 	echo " ERR : no OpenVPN client config found"

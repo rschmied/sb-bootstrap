@@ -17,11 +17,11 @@ wait_for_salt
 
 # install the router VMs (lengthy)
 echo "installing Cisco OS VM images"
-salt-call state.sls routervms
+salt-call state.sls virl.routervms.all
 
 # get all VM Maestro images
 echo "installing VM Maestro images"
-sudo salt-call state.sls virl.vmm.vmmall
+salt-call state.sls virl.vmm.vmmall
 
 # DHCP server on guest not working reliably: 
 # also requires no guest account in virl.ini for the workaround to work

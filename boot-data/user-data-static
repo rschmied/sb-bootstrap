@@ -1,18 +1,19 @@
 #cloud-config
-hostname: virl-server 
+
+hostname: virl-sandbox 
+
 package_upgrade: true
+
 packages:
 - git
+
 runcmd:
 - [ sh, /root/boot.sh ]
+
+ssh_authorized_keys:
+ - ssh-rsa some-extra-key-data-line
+
 write_files:
-- path: /tmp/AABBCCDD.some.tld.pem
-  owner: root:root
-  content: |
-    -----BEGIN RSA PRIVATE KEY-----
-    some key data
-    -----END RSA PRIVATE KEY-----
-  permissions: '0444'
 - path: /root/boot.sh
   owner: root:root
   content: |
@@ -38,4 +39,6 @@ write_files:
   owner: root:root
   content: |
     CFG_VPN_PORT=443
+    CFG_VPN_PROT=tcp
+    CFG_VPN_DEV=tap
   permissions: '0644'

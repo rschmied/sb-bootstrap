@@ -43,5 +43,11 @@ crudini --set /etc/virl/virl.cfg env virl_std_process_count 20
 # echo "restarting OpenStack services"
 # salt-call state.sls openstack-restart
 
+# to make the changes in virl.cfg effective we need to restart STD
+# (or restart the box, but this is the lesser of two evils)
+echo "restarting STD..."
+service virl-std restart
+
+
 exit $STATE_OK
 

@@ -17,7 +17,7 @@ wait_for_salt
 # packages which are present (and required) in standard
 # Ubuntu server install but are missing on Rackspace.
 echo "install one-off packages"
-apt-get install -y ethtool libffi-dev
+apt-get install -y ethtool libffi-dev openstack-dashboard nova-api python-neutronclient
 
 # do all the other VIRL install stages
 echo "install all remaining VIRL packages"

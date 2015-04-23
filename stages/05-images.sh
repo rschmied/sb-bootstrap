@@ -48,6 +48,11 @@ crudini --set /etc/virl/virl.cfg env virl_std_process_count 20
 echo "restarting STD..."
 service virl-std restart
 
+# clean up stuff as the last thing to do
+cho "cleaning up stuff..."
+apt-get autoremove -y
+apt-get autoclean -y
+apt-get clean -y
 
 exit $STATE_OK
 

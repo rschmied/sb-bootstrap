@@ -218,7 +218,6 @@ ns-cert-type server
 ;http-proxy-retry # retry on connection failures
 ;http-proxy [proxy server] [proxy port #]
 
-
 EOF
 
 # remaining config stuff

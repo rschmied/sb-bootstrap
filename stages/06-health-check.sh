@@ -45,7 +45,7 @@ NEUTRON=/usr/bin/neutron
 GLANCE=/usr/bin/glance
 OPENVPN=/usr/sbin/openvpn
 VPNCLIENTFILE=/home/virl/vpn-client.ovpn
-VPNCLIENTLINES=131
+VPNCLIENTLINES=42
 VMMAESTRODIR=/var/www/download/
 VMMAESTRONUM=4
 
@@ -140,7 +140,7 @@ fi
 if [ -f $VPNCLIENTFILE ]; then
 	CHECK=$((CHECK + 1))
 	echo -en "CHECK: [OpenVPN client config file]"
-	if [ $(cat $VPNCLIENTFILE | wc -l) -eq $VPNCLIENTLINES ]; then 
+	if [ $(cat $VPNCLIENTFILE | sed '/^-----BEGIN .*-----$/,/^-----END .*-----$/d' | wc -l) -eq $VPNCLIENTLINES ]; then 
 		echo -e "\r OK  "
 		OK=$((OK + 1))
 	else

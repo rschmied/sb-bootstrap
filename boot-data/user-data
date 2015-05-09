@@ -21,7 +21,7 @@ write_files:
     cd /root
     git clone https://github.com/rschmied/sb-bootstrap.git
     if [ -x /root/sb-bootstrap/install.sh ]; then
-      if [ $(cat $RCLOCAL | sed '/^\s*$/d' | /usr/bin/wc -l) = 0 ]; then
+      if [ $(cat 2>/dev/null $RCLOCAL | sed '/^\s*$/d' | /usr/bin/wc -l) = 0 ]; then
         echo "#!/bin/sh -e" >$RCLOCAL
         echo "exit 0" >>$RCLOCAL
         chmod u+x $RCLOCAL

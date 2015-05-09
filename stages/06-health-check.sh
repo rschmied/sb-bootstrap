@@ -38,6 +38,9 @@ IOSv
 NX-OSv
 server'
 
+IMAGES='IOSv
+IOSvL2'
+
 CHECK=0
 OK=0
 HEALTH=/usr/local/bin/virl_health_status
@@ -47,7 +50,8 @@ OPENVPN=/usr/sbin/openvpn
 VPNCLIENTFILE=/home/virl/vpn-client.ovpn
 VPNCLIENTLINES=42
 VMMAESTRODIR=/var/www/download/
-VMMAESTRONUM=4
+#VMMAESTRONUM=4
+VMMAESTRONUM=0
 
 # do checks against virl_health_status
 if [ -x $HEALTH ]; then 

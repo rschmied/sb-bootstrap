@@ -29,6 +29,7 @@ echo "install all remaining VIRL packages"
 /usr/local/bin/vinstall all
 
 # fix Linux bridging (only temporary needed, should go into all eventually)
+echo "install bridge patch (will take a few minutes)"
 /usr/local/bin/vinstall bridge
 
 # fix the bind port in nova.conf

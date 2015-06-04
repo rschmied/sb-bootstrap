@@ -52,7 +52,7 @@ echo "restarting STD..."
 service virl-std restart
 
 # clean up stuff as the last thing to do
-cho "cleaning up stuff..."
+echo "cleaning up stuff..."
 apt-get autoremove -y
 apt-get autoclean -y
 apt-get clean -y

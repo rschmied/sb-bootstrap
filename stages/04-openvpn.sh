@@ -11,9 +11,25 @@ cd $(dirname $0)
 #
 # get the IPv4 address of the interface with the default route
 #
-function default_ipv4 () {
-  iface=$(ip route | awk '/^default / { for(i=0;i<NF;i++) { if ($i == "dev") { print $(i+1); next; }}}')
-  echo $(ifconfig $iface | sed -rn 's/.*r:([^ ]+) .*/\1/p')
+function get_external_ipv4 () {
+
+  # try to get an external address first
+  # "Your IP address is 12.13.14.15"
+  external_ip=$(curl -s http://whatismijnip.nl)
+  if [ $? -eq 0 ]; then
+    external_ip=$(echo $external_ip | cut -d " " -f 5)
+  else
+    unset external_ip
+  fi
+
+  # if it did not work, get the IP which has the default route
+  if [ -z $external_ip ]; then
+    iface=$(ip route | awk '/^default / { for(i=0;i<NF;i++) { if ($i == "dev") { print $(i+1); next; }}}')
+    echo $(ifconfig $iface | sed -rn 's/.*r:([^ ]+) .*/\1/p')
+  else
+    echo $external_ip
+  fi
+
 }
 
 #
@@ -120,7 +136,8 @@ else
 #!/bin/bash
 #
 # If using a bridged interface, some more stuff is required.
-# The bridge will be attached to FLAT == dummy1 interface.
+# The bridge will be attached to FLAT == l2_port interface.
+# l2_port is defined in /etc/virl.ini
 #
 # First, get the L3 interface attached to FLAT.
 # It might take a while until Neutron brings it up so we wait for it.
@@ -133,9 +150,10 @@ else
 # \$6 = [ init | restart ]
 #
 
+l2_port=\$(crudini --get /etc/virl.ini DEFAULT l2_port)
 flat=""
 while [ "\$flat" = "" ]; do
-  flat=\$(brctl show | sed -rne '/dummy1/s/^(brq[a-z0-9\-]{11}).*dummy1$/\1/p')
+  flat=\$(brctl show | sed -rne '/'\$l2_port'/s/^(brq[a-z0-9\-]{11}).*'\$l2_port'$/\1/p')
   if [ "\$flat" = "" ]; then
   	echo "OpenVPN: waiting for FLAT bridge to come up..."
   	sleep 5
@@ -222,7 +240,7 @@ EOF
 
 # remaining config stuff
 echo -n "remote " >>$CFG_VPN_CONF
-default_ipv4 >>$CFG_VPN_CONF
+get_external_ipv4 >>$CFG_VPN_CONF
 print_cert "ca" ca.crt >>$CFG_VPN_CONF
 print_cert "cert" virl-sandbox-client.crt >>$CFG_VPN_CONF
 print_cert "key" virl-sandbox-client.key >>$CFG_VPN_CONF

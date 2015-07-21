@@ -50,7 +50,10 @@ OPENVPN=/usr/sbin/openvpn
 VPNCLIENTFILE=/home/virl/vpn-client.ovpn
 VPNCLIENTLINES=42
 VMMAESTRODIR=/var/www/download/
-#VMMAESTRONUM=4
+
+# minimum number of VM Maestro binaries
+# we expect to be installed (0 = none)
+# maximum 4
 VMMAESTRONUM=0
 
 # do checks against virl_health_status
@@ -101,7 +104,7 @@ fi
 if [ -d $VMMAESTRODIR ]; then
 	CHECK=$((CHECK + 1))
 	echo -en "CHECK: [VM Maestro binaries]"
-	if [ $(ls $VMMAESTRODIR | wc -l) -eq $VMMAESTRONUM ]; then
+	if [ $(ls $VMMAESTRODIR | wc -l) -ge $VMMAESTRONUM ]; then
 		echo -e "\r OK  "
 		OK=$((OK + 1))
 	else

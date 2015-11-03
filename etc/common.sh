@@ -10,6 +10,7 @@ STATE_OK=0
 STATE_REBOOT=1
 STATE_FATAL=2
 
+DEBIAN_FRONTEND=noninteractive
 
 #######################################
 # configurable things below with CFG_ #
